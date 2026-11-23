@@ -1,0 +1,26 @@
+{
+  "name": "p2p-lan-messenger",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Offline-first, serverless peer-to-peer LAN messenger",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "imports": {
+    "#core/*": "./modules/core/src/*",
+    "#contracts/*": "./shared/contracts/*",
+    "#types/*": "./shared/types/*",
+    "#mocks/*": "./shared/mocks/*"
+  },
+  "scripts": {
+    "test": "node --test",
+    "test:watch": "node --test --watch",
+    "typecheck": "tsc --noEmit",
+    "validate": "npm run typecheck && npm test"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "typescript": "^5.9.3"
+  }
+}

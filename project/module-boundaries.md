@@ -21,7 +21,7 @@ Authoritative boundary reference; see [docs/modules](../docs/modules/README.md) 
 
 ## Shared contracts
 
-Interfaces and common types belong in `shared/contracts` and `shared/types`, agreed before implementation. Modules communicate through those contracts and events. Platform-specific behavior sits behind adapters with graceful fallbacks; mock implementations satisfy the same contracts as real ones.
+Interfaces and common types live in `shared/contracts` and `shared/types`; they are implemented in Level 0 and ready to consume. Modules communicate through those contracts and events. Platform-specific behavior sits behind adapters with graceful fallbacks; mock implementations satisfy the same contracts as real ones and live in `shared/mocks`.
 
 ## Module isolation
 
@@ -31,4 +31,4 @@ Local Storage is **shared infrastructure**: identity, settings, conversations, m
 
 ## Independent development and testing
 
-Parallel work is organized around Core & Foundation, Network Core, Messaging Engine, Group System, and File Transfer; Storage is shared infrastructure with boundaries fixed up front. Every module must be buildable/testable alone using mocks, and integration happens incrementally through `dev`. No implementation files exist yet.
+Parallel work is organized around Core & Foundation, Network Core, Messaging Engine, Group System, and File Transfer; Storage is shared infrastructure with boundaries fixed up front. Every module must be buildable/testable alone using mocks, and integration happens incrementally through `dev`. Level 0 provides the contracts and mocks; feature module directories remain placeholders.

@@ -8,7 +8,17 @@ Make local peer-to-peer communication simple enough for anyone to use: open the 
 
 ## Status
 
-**Initialization / planning stage.** This repository contains documentation and organizational placeholders only. No application code, framework, or dependencies have been created; nothing has been built or run.
+**Level 0 (Core Foundation) is implemented and validated.** Shared contracts, a
+small core library, mock infrastructure and 65 deterministic tests are in
+place. Feature directories are still placeholders: peer discovery, chat, groups,
+file transfer, the database and the UI shell are not implemented yet.
+
+```bash
+npm install
+npm run validate   # typecheck + offline tests; no LAN devices required
+```
+
+See [Core Foundation](docs/foundation.md) for contracts and developer handoff.
 
 ## Core features (planned)
 
@@ -30,13 +40,14 @@ One shared codebase for desktop and mobile where practical, with platform-specif
 
 ## Architecture overview
 
-- `modules/` — planned independent modules: core (foundation), network, messaging, groups, file-transfer, and shared storage infrastructure.
-- `shared/` — home for agreed contracts and types before implementation.
-- `docs/` — architecture, module, development, and decision documentation.
-- `project/` — milestones, module boundaries, and development workflow.
-- `tests/` — planned testing approach.
+- `modules/` — independent modules: core (implemented foundation) plus placeholders for network, messaging, groups, file-transfer and storage.
+- `shared/` — agreed contracts and types (`shared/contracts`, `shared/types`) plus mock implementations for parallel development (`shared/mocks`).
+- `docs/` — architecture, module, development, decision and foundation documentation.
+- `project/` — milestones, module boundaries and development workflow.
+- `tests/` — deterministic foundation and mock tests using Node's test runner.
 
 See [AGENTS.md](AGENTS.md) for the full project context and agent rules.
+See [Core Foundation](docs/foundation.md) for the implemented public interfaces.
 
 ## Planned milestones
 
@@ -54,4 +65,4 @@ Details: [project/milestones.md](project/milestones.md).
 ## Documentation map
 
 - [Architecture](docs/architecture/README.md) · [Modules](docs/modules/README.md) · [Development](docs/development/README.md) · [Decisions](docs/decisions/README.md)
-- [Module boundaries](project/module-boundaries.md) · [Workflow](project/development-workflow.md) · [Testing approach](tests/README.md)
+- [Core Foundation](docs/foundation.md) · [Module boundaries](project/module-boundaries.md) · [Workflow](project/development-workflow.md) · [Testing](tests/README.md)

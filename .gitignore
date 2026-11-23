@@ -21,3 +21,6 @@ venv/
 __pycache__/
 coverage/
 .pytest_cache/
+
+# Local application data created at runtime
+.lan-messenger/

@@ -1,6 +1,10 @@
 # Architecture decision records
 
-Lightweight decision log for choices that affect architecture, interfaces, dependencies, or platforms. **No technical decisions have been finalized during scaffolding.**
+Lightweight decision log for choices that affect architecture, interfaces, dependencies, or platforms.
+
+## Decisions
+
+- [0001 — TypeScript foundation with platform adapters](0001-typescript-cross-platform-foundation.md) (accepted for Level 0; UI shell deferred to M1).
 
 ## When to write one
 
