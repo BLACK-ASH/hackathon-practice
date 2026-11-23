@@ -1,4 +1,5 @@
 import { HashRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom';
+import { ChatPage } from './chat/ChatPage';
 import { ChatsPage } from './pages/ChatsPage';
 import { GroupsPage } from './pages/GroupsPage';
 import { NearbyPage } from './pages/NearbyPage';
@@ -22,6 +23,7 @@ export function AppRoutes() {
       <Route element={<ShellLayout />}>
         <Route index element={<Navigate replace to={defaultRoute} />} />
         <Route element={<ChatsPage />} path="/chats" />
+        <Route element={<ChatPage />} path="/chats/:conversationId" />
         <Route element={<NearbyPage />} path="/nearby" />
         <Route element={<GroupsPage />} path="/groups" />
         <Route element={<TransfersPage />} path="/transfers" />
