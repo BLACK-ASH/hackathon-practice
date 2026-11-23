@@ -25,6 +25,7 @@ to this file:
 | `mock-network.test.ts` | Simulated discovery, connect/disconnect/offline, send failures, duplicate delivery, handler isolation |
 | `mock-storage.test.ts` | All repositories, ordering, cloning, failure injection |
 | `mock-messenger.test.ts` | Seeded UI facade, send/read/retry, groups, transfers, health |
+| `messaging.test.ts` | Real messaging engine over mocks: send/retry, receipts, ordering, duplicates, malformed payloads |
 | `boundaries.test.ts` | Import-direction rules and runtime contract helpers |
 
 ## Planned levels

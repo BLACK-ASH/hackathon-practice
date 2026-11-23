@@ -1,6 +1,6 @@
 # Planned modules
 
-Module directories under `modules/` contain the Core & Foundation implementation; every other directory is an organizational placeholder for its owner. Shared contracts live in `shared/contracts`, common types in `shared/types`, and mock implementations in `shared/mocks`. Boundaries are detailed in [module boundaries](../../project/module-boundaries.md); public interfaces and handoff guidance are in [Core Foundation](../foundation.md).
+Module directories under `modules/` contain the Core & Foundation implementation and the independent private-messaging engine; the other directories are organizational placeholders for their owners. Shared contracts live in `shared/contracts`, common types in `shared/types`, and mock implementations in `shared/mocks`. Boundaries are detailed in [module boundaries](../../project/module-boundaries.md); public interfaces and handoff guidance are in [Core Foundation](../foundation.md).
 
 ## Core & Foundation
 
@@ -21,10 +21,10 @@ Module directories under `modules/` contain the Core & Foundation implementation
 ## Messaging Engine
 
 - **Responsibility:** private messages, IDs, send/receive, ordering, duplicate detection, delivery state, retry, local conversation history.
-- **Scope:** private messaging only; independent of groups and transfers.
-- **Depends on:** Network Core interface + Storage interface.
-- **Must not own:** group internals, file transfer internals, transport implementation.
-- **Testing:** mock transport for success, delay, failure, duplicates, offline peers; persistence and ordering.
+- **Scope:** private messaging only; independent of groups and transfers. Implemented in `modules/messaging` as `MessagingEngine`.
+- **Depends on:** Network Core interface + Storage interface + Core identity, IDs, clock, events and logger.
+- **Must not own:** group internals, file transfer internals, transport implementation, UI rendering or durable database code.
+- **Testing:** `tests/messaging.test.ts` covers success, failed send and retry, incoming ordering, duplicate suppression, receipts, malformed payloads and shutdown using mock network/storage.
 
 ## Group System
 
@@ -50,4 +50,4 @@ Module directories under `modules/` contain the Core & Foundation implementation
 - **Must not own:** network or feature business logic.
 - **Testing:** persistence across restarts, malformed/corrupt data handling, failure reporting and recovery.
 
-Five agents can prepare Core, Network, Messaging, Groups, and File Transfer in parallel; Storage is shared infrastructure with boundaries agreed before implementation. Core, its contracts and its mocks are implemented; the other module directories remain unassigned placeholders.
+Five agents can prepare Core, Network, Messaging, Groups, and File Transfer in parallel; Storage is shared infrastructure with boundaries agreed before implementation. Core, its contracts and its mocks are implemented, and the messaging engine is implemented independently. The other module directories remain unassigned placeholders.
