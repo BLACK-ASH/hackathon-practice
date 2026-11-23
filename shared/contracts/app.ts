@@ -5,7 +5,7 @@ import type { FileSource, FileTransferRecord } from './files.ts';
 import type { ModuleHealthReport, ModuleStartReport } from './lifecycle.ts';
 import type { PeerIdentity } from './identity.ts';
 import type { PeerInfo } from './peer.ts';
-import type { ConversationId, GroupId, MessageId, PeerId } from '../types/ids.ts';
+import type { ConversationId, GroupId, MessageId, PeerId, TransferId } from '../types/ids.ts';
 
 /**
  * UI-facing facade implemented by the integration layer. It composes feature
@@ -38,6 +38,8 @@ export interface MessengerApi {
   sendGroupMessage(groupId: GroupId, body: string): Promise<ChatMessage>;
 
   sendFile(peerId: PeerId, file: FileSource): Promise<FileTransferRecord>;
+  acceptFileTransfer(transferId: TransferId): Promise<FileTransferRecord>;
+  rejectFileTransfer(transferId: TransferId): Promise<FileTransferRecord>;
   listTransfers(): Promise<readonly FileTransferRecord[]>;
 
   getModuleHealth(): readonly ModuleHealthReport[];

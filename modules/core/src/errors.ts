@@ -43,12 +43,20 @@ export class AppError extends Error {
         };
   }
 
-  static from(error: unknown, fallbackCode: ErrorCode = 'internal'): AppError {
+  static from(
+    error: unknown,
+    fallbackCode: ErrorCode = 'internal',
+    safeMessage?: string,
+  ): AppError {
     if (error instanceof AppError) return error;
     if (error instanceof Error) {
-      return new AppError(fallbackCode, error.message, { cause: error });
+      return new AppError(fallbackCode, safeMessage ?? error.message, {
+        cause: error,
+      });
     }
-    return new AppError(fallbackCode, String(error), { cause: error });
+    return new AppError(fallbackCode, safeMessage ?? String(error), {
+      cause: error,
+    });
   }
 }
 

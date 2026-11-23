@@ -54,7 +54,7 @@ feature modules. `tests/boundaries.test.ts` enforces this.
 | `shared/contracts/network.ts` | `PeerNetwork`, `CHANNELS`, `IncomingPeerMessage`, `PeerMessageHandler`, `SendOptions` |
 | `shared/contracts/messaging.ts` | `MessagingService`, `ChatMessage`, `Conversation`, `MessageQuery`, `privateConversationId()`, `groupConversationId()` |
 | `shared/contracts/groups.ts` | `GroupService`, `GroupInfo`, `GroupMember`, `CreateGroupInput` |
-| `shared/contracts/files.ts` | `FileTransferService`, `FileSource`, `FileTransferRecord`, `FileTransferProgress` |
+| `shared/contracts/files.ts` | `FileTransferService` (send/accept/reject/cancel), `FileSource`, `FileTransferRecord`, `FileTransferProgress` |
 | `shared/contracts/storage.ts` | `StorageService` and its six repositories |
 | `shared/contracts/app.ts` | `MessengerApi`, `ApplicationHost` |
 | `shared/contracts/index.ts` | Re-exports all of the above |
@@ -106,7 +106,7 @@ await registry.stop();
 | Network module | `network.peer.discovered`, `network.peer.updated`, `network.peer.lost`, `network.connection.changed` |
 | Messaging | `messaging.conversation.updated`, `messaging.message.received`, `messaging.message.updated` |
 | Groups | `groups.group.updated`, `groups.group.removed`, `groups.message.received` |
-| File transfer | `files.transfer.updated`, `files.transfer.progress` |
+| File transfer | `files.transfer.requested` (pending incoming), `files.transfer.updated`, `files.transfer.progress` |
 | Storage | `storage.error` |
 
 Events are synchronous state announcements, not request/response calls. Use
@@ -118,7 +118,9 @@ unsubscribe via `context.onCleanup(subscription.unsubscribe)`.
 ## Error handling conventions
 
 - Throw `AppError` across module boundaries with a stable code and a
-  user-safe message; wrap platform errors with `AppError.from(error, code)`.
+  user-safe message; wrap platform errors with
+  `AppError.from(error, code, safeMessage)` so raw details stay in `cause` and
+  never reach `ErrorInfo` or the UI.
 - Use `ErrorInfo` in events, health and records; never expose raw socket paths,
   ports or stack traces to the UI.
 - Peer-level failures belong in `ConnectionInfo.lastError` or a transfer
@@ -149,7 +151,9 @@ performs network I/O or durable writes.
   `markReconnecting`, `disconnect`, `send`, `failNextSends`, `deliverFrom`,
   `deliverDuplicate`, `onMessage`; emits peer and connection events.
 - `createMockMessengerApi()` — seeded `MessengerApi` with peers, chats, a group
-  and a transfer. Sends never leave the process.
+  and a transfer. Sends never leave the process. Its `storage`, `network` and
+  `identity` fields are test-only handles; UI code must use `MessengerApi`,
+  events and health only.
 
 ```ts
 const { network, storage, events, clock } = createTestContext();
@@ -177,8 +181,9 @@ facade later without changing UI code.
   `GroupInfo`, `groupConversationId()` and per-member `send()` calls so one
   failure cannot block others.
 - **File transfer:** inject `PeerNetwork` and `StorageService`; use
-  `CHANNELS.files`, `FileSource.chunks()`, `FileTransferRecord` and the
-  transfer repository. Progress events are defined in `AppEvents`.
+  `CHANNELS.files`, `FileSource.chunks()`, `FileTransferRecord`, announce
+  pending incoming transfers with `files.transfer.requested`, and implement
+  accept/reject/cancel. Progress events are defined in `AppEvents`.
 - **Storage:** implement `StorageService` with the platform database; use
   `InMemoryStorage` for contract tests. Own all schemas and migrations.
 - **UI:** consume `MessengerApi`, `AppEvents` and `ModuleHealthReport`; use
@@ -189,7 +194,7 @@ facade later without changing UI code.
 ```bash
 npm install          # two dev dependencies only
 npm run typecheck    # tsc --noEmit
-npm test             # node:test; 65 tests, no network or devices
+npm test             # node:test; 69 tests, no network or devices
 npm run validate     # both
 ```
 

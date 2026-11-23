@@ -15,9 +15,11 @@ export function withTimeout<T>(
     const timer = setTimeout(() => {
       try {
         onTimeout?.();
-      } finally {
-        reject(new AppError('timeout', `Operation timed out after ${timeoutMs}ms`));
+      } catch {
+        // The timeout result still wins; a hook failure must not escape the
+        // timer callback and terminate the process.
       }
+      reject(new AppError('timeout', `Operation timed out after ${timeoutMs}ms`));
     }, timeoutMs);
     promise.then(
       (value) => {
