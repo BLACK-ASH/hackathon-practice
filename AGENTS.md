@@ -927,8 +927,28 @@ Documentation must describe actual implemented behavior.
 
 ---
 
-## 19. Git Safety
+## 19. Parallel Module Development Rules
 
+- Modules must represent complete, meaningful capabilities, not artificial subdivisions of a single feature.
+- A module must own its internal logic, state, UI where applicable, persistence requirements, validation, and tests.
+- Never divide a single module into assignments such as controller, service, repository, UI, and protocol for different team members.
+- Do not create redundant modules that duplicate responsibilities or require each other to implement the same capability.
+- Modules must be independently implementable, testable, and demonstrable using mocks.
+- Cross-module communication must use predefined public contracts, interfaces, and events.
+- Modules must not import, manipulate, or depend on another module's internal implementation.
+- A module must not require another module's unfinished implementation to begin or complete its own development.
+- Use mock providers and adapters wherever real integrations are not yet available.
+- Integration work must connect completed modules; it must not reimplement their functionality.
+- If two proposed modules cannot function or be tested independently, reconsider their boundaries before assigning them to different developers.
+- Do not create additional modules solely to distribute work among team members.
+- Prefer fewer, complete, independently owned modules over excessive fragmentation.
+- Modules must degrade gracefully if optional integrations are unavailable.
+
+---
+
+## 20. Git Safety
+
+- **Strict rule:** every feature must be implemented on its own separate branch, merged into `dev` after validation, and only then merged into `main`. Never commit a feature directly to `dev` or `main`.
 - Never implement directly on `main`.
 - `main` is reserved for production-ready code.
 - Use feature branches for implementation.
@@ -944,7 +964,7 @@ When work is performed in a linked worktree, validate the completed feature and 
 
 ---
 
-## 20. Definition of Done
+## 21. Definition of Done
 
 A feature is complete only when:
 
@@ -964,7 +984,7 @@ A mock implementation must be clearly identified as a mock.
 
 ---
 
-## 21. Final Product Vision
+## 22. Final Product Vision
 
 A user should be able to install the application on their device, open it, set a display name, automatically discover nearby users, start a private conversation, create a group, and share files without requiring internet connectivity or centralized infrastructure.
 
