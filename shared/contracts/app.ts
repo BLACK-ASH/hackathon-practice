@@ -4,7 +4,7 @@ import type { CreateGroupInput, GroupInfo } from './groups.ts';
 import type { FileSource, FileTransferRecord } from './files.ts';
 import type { ModuleHealthReport, ModuleStartReport } from './lifecycle.ts';
 import type { PeerIdentity } from './identity.ts';
-import type { PeerInfo } from './peer.ts';
+import type { ConnectionInfo, PeerInfo } from './peer.ts';
 import type { ConversationId, GroupId, MessageId, PeerId, TransferId } from '../types/ids.ts';
 
 /**
@@ -19,6 +19,9 @@ export interface MessengerApi {
   updateDisplayName(displayName: string): Promise<PeerIdentity>;
 
   listPeers(): readonly PeerInfo[];
+
+  connect(peerId: PeerId): Promise<ConnectionInfo>;
+  disconnect(peerId: PeerId): Promise<void>;
 
   listConversations(): Promise<readonly Conversation[]>;
   listMessages(

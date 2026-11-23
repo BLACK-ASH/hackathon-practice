@@ -71,6 +71,45 @@ test('sending a message appends it, updates the conversation and emits an event'
   );
 });
 
+test('peer connection lifecycle is available through the UI facade', async () => {
+  const api = await createMockMessengerApi();
+  const states: string[] = [];
+  api.events.on('network.connection.changed', (connection) => {
+    states.push(`${connection.peerId}:${connection.state}`);
+  });
+  const peerState = () =>
+    api.listPeers().find((peer) => peer.peerId === 'peer_aisha')?.connectionState;
+
+  const connected = await api.connect('peer_aisha');
+  assert.equal(connected.state, 'connected');
+  assert.equal(peerState(), 'connected');
+  assert.deepEqual(states, ['peer_aisha:connecting', 'peer_aisha:connected']);
+
+  assert.equal((await api.connect('peer_aisha')).state, 'connected');
+  assert.equal(states.length, 2);
+
+  await api.disconnect('peer_aisha');
+  assert.equal(peerState(), 'disconnected');
+  assert.equal(states.at(-1), 'peer_aisha:disconnected');
+
+  await api.disconnect('peer_aisha');
+  assert.equal(states.filter((state) => state.endsWith(':disconnected')).length, 2);
+  assert.equal((await api.connect('peer_aisha')).state, 'connected');
+
+  await assert.rejects(
+    api.connect('unknown'),
+    (error: { code?: string }) => error.code === 'not_found',
+  );
+  await assert.rejects(
+    api.connect('peer_sam'),
+    (error: { code?: string }) => error.code === 'unavailable',
+  );
+  await assert.rejects(
+    api.disconnect('unknown'),
+    (error: { code?: string }) => error.code === 'not_found',
+  );
+});
+
 test('read state and retry use the shared storage contract', async () => {
   const api = await createMockMessengerApi();
   const conversationId = privateConversationId('peer_aisha');

@@ -12,7 +12,7 @@ import type { CreateGroupInput, GroupInfo } from '#contracts/groups.ts';
 import type { FileSource, FileTransferRecord } from '#contracts/files.ts';
 import type { ModuleHealthReport } from '#contracts/lifecycle.ts';
 import type { PeerIdentity, IdentityService } from '#contracts/identity.ts';
-import type { PeerInfo } from '#contracts/peer.ts';
+import type { ConnectionInfo, PeerInfo } from '#contracts/peer.ts';
 import type { IdGenerator } from '#contracts/ids.ts';
 import type { ConversationId, GroupId, MessageId, PeerId, TransferId } from '#types/ids.ts';
 import { AppError } from '#core/errors.ts';
@@ -101,6 +101,14 @@ export class MockMessengerApi implements MessengerApi {
 
   listPeers(): readonly PeerInfo[] {
     return this.network.listPeers();
+  }
+
+  connect(peerId: PeerId): Promise<ConnectionInfo> {
+    return this.network.connect(peerId);
+  }
+
+  disconnect(peerId: PeerId): Promise<void> {
+    return this.network.disconnect(peerId);
   }
 
   async listConversations(): Promise<readonly Conversation[]> {

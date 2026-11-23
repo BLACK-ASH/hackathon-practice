@@ -64,6 +64,12 @@ modules own their serialization; the network module never parses chat, group
 or file payloads. `CHANNELS` reserves the three feature channels; control
 traffic belongs inside the network module.
 
+`MessengerApi.connect()` and `disconnect()` expose peer lifecycle actions to
+the UI without exposing the network layer. `connect()` returns the shared
+`ConnectionInfo`; unknown/offline peers throw `AppError` (`not_found` /
+`unavailable`). State is observed through `listPeers()` and the
+`network.connection.changed` event.
+
 ## Module lifecycle and isolation
 
 ```ts
