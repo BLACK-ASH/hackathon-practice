@@ -925,6 +925,46 @@ Update documentation whenever architecture, interfaces, setup, configuration, or
 
 Documentation must describe actual implemented behavior.
 
+### Phase Completion and Handoff
+
+Whenever a phase is completed, before doing anything else, provide a **Phase Completion Report** containing:
+
+- What was implemented.
+- Files/modules changed.
+- Validation and test results.
+- Remaining issues or blockers.
+- Commit hash, if applicable.
+
+After completing a phase and presenting its report, **STOP**. Do not automatically begin the next phase, task, or implementation. Wait for explicit approval from the user.
+
+Before starting the next phase, only after explicit approval:
+
+1. Switch to `dev`.
+2. Pull the latest `dev` from origin.
+3. Create a dedicated feature branch for the next phase from the updated `dev`.
+4. Verify the branch and working tree before beginning implementation.
+
+```bash
+git switch dev
+git pull origin dev
+git switch -c feature/<phase-name>
+```
+
+In a linked worktree, follow the equivalent safe workflow: start from the updated `dev`, create the dedicated branch there, and verify the branch and working tree before implementation.
+
+### Blocker Rule — Absolutely Mandatory
+
+If the next task, phase, or feature is blocked by another team member, an unfinished module, a missing dependency, an unavailable integration, or any other external prerequisite:
+
+- Do not invent substitute work.
+- Do not implement an alternative feature just to remain busy.
+- Do not bypass the dependency using mocks unless mocks are explicitly part of the assigned task.
+- Do not start unrelated tasks.
+- Do not attempt to take over another member's assigned work.
+- Do not perform unnecessary audits, refactoring, scaffolding, or tests to fill the gap.
+- Clearly report what is blocked, who or what it depends on, and what is needed to unblock it.
+- **STOP** and wait for further instructions.
+
 ---
 
 ## 19. Parallel Module Development Rules
@@ -952,15 +992,17 @@ Documentation must describe actual implemented behavior.
 - Never implement directly on `main`.
 - `main` is reserved for production-ready code.
 - Use feature branches for implementation.
+- Every implementation branch must be created from an updated `dev`.
 - Use `dev` for integration and testing.
 - Integrate into `dev` only after validation.
 - Never push unvalidated code directly to `main`.
 - Do not overwrite another developer's changes.
 - Do not discard existing modifications without permission.
+- Never force-push, hard-reset, or otherwise overwrite or discard existing changes.
 - Keep commits focused.
 - Validate before integration.
 
-When work is performed in a linked worktree, validate the completed feature and merge its feature branch back into `dev` through the integration workflow.
+When work is performed in a linked worktree, start from the updated `dev`, verify the branch and working tree, then validate the completed feature and merge its feature branch back into `dev` through the integration workflow.
 
 ---
 
