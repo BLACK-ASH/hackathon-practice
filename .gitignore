@@ -1,0 +1,23 @@
+# OS and editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*~
+.idea/
+
+# Logs and local configuration
+*.log
+.env
+.env.*
+
+# Common build, dependency, and test output (stack-neutral)
+build/
+dist/
+out/
+node_modules/
+.venv/
+venv/
+__pycache__/
+coverage/
+.pytest_cache/
