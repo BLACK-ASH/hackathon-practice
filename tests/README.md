@@ -62,8 +62,9 @@ npm run build        # tsc --noEmit && vite build
 | `src/peers/PeerDirectory.test.tsx` | Loading/empty/error/ready states, connection-first ordering, details lifecycle, peer refresh handling and action pass-through |
 | `src/pages/NearbyPage.test.tsx` | Route-level peer status rendering, Core event updates, peer disappearance and safe error display |
 | `src/chat/ChatUI.test.tsx` | Private inbox rendering, stored history, send/Enter/Shift+Enter, empty draft, pending and failed sends, safe history errors, event-driven updates, duplicate suppression, loading, empty and not-found states |
+| `src/groups/GroupUI.test.tsx` | Group list previews, creation validation and navigation, member/details view, stored group history, sends, safe failures, event-driven updates, duplicate suppression, empty and not-found states |
 
-Current results: root `74/74` passing; app `54/54` passing. No real LAN devices,
+Current results: root `74/74` passing; app `65/65` passing. No real LAN devices,
 native runtime, network sockets or external services are used.
 
 ## Planned levels

@@ -1,5 +1,6 @@
 import { HashRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import { ChatPage } from './chat/ChatPage';
+import { GroupChatPage } from './groups/GroupChatPage.tsx';
 import { ChatsPage } from './pages/ChatsPage';
 import { GroupsPage } from './pages/GroupsPage';
 import { NearbyPage } from './pages/NearbyPage';
@@ -26,6 +27,7 @@ export function AppRoutes() {
         <Route element={<ChatPage />} path="/chats/:conversationId" />
         <Route element={<NearbyPage />} path="/nearby" />
         <Route element={<GroupsPage />} path="/groups" />
+        <Route element={<GroupChatPage />} path="/groups/:groupId" />
         <Route element={<TransfersPage />} path="/transfers" />
         <Route element={<SettingsPage />} path="/settings" />
         <Route element={<NotFoundPage />} path="*" />
