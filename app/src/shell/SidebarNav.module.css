@@ -1,0 +1,140 @@
+.sidebar {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex: 0 0 264px;
+  flex-direction: column;
+  width: 264px;
+  height: 100dvh;
+  min-height: 100dvh;
+  padding: var(--space-5) var(--space-3);
+  background: var(--surface-panel);
+  border-right: 1px solid var(--border);
+}
+
+.brandSlot {
+  padding: var(--space-1) var(--space-3) var(--space-6);
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 46px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 650;
+  text-decoration: none;
+  transition: background-color 140ms ease, color 140ms ease;
+}
+
+.navItem:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.navItemActive,
+.navItemActive:hover {
+  background: var(--surface-active);
+  color: var(--brand-strong);
+  box-shadow: inset 3px 0 0 var(--brand);
+}
+
+.navIcon {
+  flex: 0 0 20px;
+  display: grid;
+  place-items: center;
+}
+
+.navLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.footer {
+  margin-top: auto;
+  padding: var(--space-4) var(--space-3) 0;
+  border-top: 1px solid var(--border);
+}
+
+.footerStatus {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.statusDot {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--brand-soft);
+}
+
+.footerMeta {
+  margin: var(--space-1) 0 0 16px;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .sidebar {
+    flex-basis: 76px;
+    width: 76px;
+    align-items: center;
+    padding-inline: var(--space-2);
+  }
+
+  .brandSlot {
+    padding-inline: 0;
+  }
+
+  .nav {
+    width: 100%;
+  }
+
+  .navItem {
+    justify-content: center;
+    width: 52px;
+    margin-inline: auto;
+    padding: 0;
+  }
+
+  .navLabel,
+  .footerText {
+    display: none;
+  }
+
+  .footer {
+    width: 100%;
+    padding-inline: 0;
+  }
+
+  .footerStatus {
+    justify-content: center;
+  }
+
+  .footerMeta {
+    margin: 0;
+  }
+}
+
+@media (max-width: 767px) {
+  .sidebar {
+    display: none;
+  }
+}

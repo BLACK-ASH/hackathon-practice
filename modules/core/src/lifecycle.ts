@@ -9,7 +9,6 @@ import type {
   ModuleReportStatus,
   ModuleStartReport,
   ModuleStartResult,
-  ModuleStatus,
 } from '#contracts/lifecycle.ts';
 import type { Logger } from '#contracts/logging.ts';
 import type { Clock } from '#types/time.ts';

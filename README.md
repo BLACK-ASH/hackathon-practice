@@ -8,18 +8,25 @@ Make local peer-to-peer communication simple enough for anyone to use: open the 
 
 ## Status
 
-**Level 0 (Core Foundation) is implemented and validated.** Shared contracts, a
-small core library, mock infrastructure and 70 pre-existing tests are in place.
-The independent Level 2 private-messaging engine adds 4 module tests. Real peer
-discovery/network, durable storage, groups, file transfer, the UI shell and
-integration facade are not implemented yet.
+**Level 0 Core Foundation and the Level 0 UI shell are implemented and validated.** Shared contracts, the core library, mock infrastructure and 70 pre-existing root tests are in place. The independent Level 2 private-messaging engine adds 4 module tests. The UI shell in `app/` is wired to the Core `MessengerApi` mock facade and has 14 Vitest tests.
+
+Real peer discovery/network, durable storage, groups, file transfer and the real integration facade are not implemented. The UI displays clearly labeled mock data; it does not send real messages, discover real peers or transfer real files.
 
 ```bash
+# Core Foundation (root)
 npm install
-npm run validate   # typecheck + offline tests; no LAN devices required
+npm run validate       # typecheck + node:test, no network or devices
+
+# UI shell
+cd app
+npm ci
+npm run typecheck
+npm test
+npm run lint
+npm run build
 ```
 
-See [Core Foundation](docs/foundation.md) for contracts and developer handoff.
+See [Core Foundation](docs/foundation.md), [Application shell](docs/development/app-shell.md) and the [integration handoff](docs/development/app-shell-integration-handoff.md).
 
 ## Core features (planned)
 
@@ -41,7 +48,8 @@ One shared codebase for desktop and mobile where practical, with platform-specif
 
 ## Architecture overview
 
-- `modules/` — independent modules: core (implemented foundation) plus placeholders for network, messaging, groups, file-transfer and storage.
+- `app/` — web UI shell: responsive navigation, Core-backed mock pages and focused UI tests.
+- `modules/` — independent modules: core and private messaging implemented, with placeholders for network, groups, file-transfer and storage.
 - `shared/` — agreed contracts and types (`shared/contracts`, `shared/types`) plus mock implementations for parallel development (`shared/mocks`).
 - `docs/` — architecture, module, development, decision and foundation documentation.
 - `project/` — milestones, module boundaries and development workflow.
@@ -66,4 +74,5 @@ Details: [project/milestones.md](project/milestones.md).
 ## Documentation map
 
 - [Architecture](docs/architecture/README.md) · [Modules](docs/modules/README.md) · [Development](docs/development/README.md) · [Decisions](docs/decisions/README.md)
-- [Core Foundation](docs/foundation.md) · [Module boundaries](project/module-boundaries.md) · [Workflow](project/development-workflow.md) · [Testing](tests/README.md)
+- [Core Foundation](docs/foundation.md) · [Application shell](docs/development/app-shell.md) · [Integration handoff](docs/development/app-shell-integration-handoff.md)
+- [Module boundaries](project/module-boundaries.md) · [Workflow](project/development-workflow.md) · [Testing](tests/README.md)

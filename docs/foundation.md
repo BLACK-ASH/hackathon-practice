@@ -1,8 +1,10 @@
 # Core Foundation (Level 0)
 
 Implemented foundation and shared contracts for the P2P LAN Messenger. This is
-the boundary layer every other module consumes; it contains **no** LAN
-discovery, chat, group, transfer, database or UI implementation.
+the boundary layer every other module consumes; the Core implementation itself
+contains **no** LAN discovery, chat, group, transfer, database or UI code. The
+Level 0 UI shell lives separately in `app/` and consumes the facade described
+below; see [Application shell](development/app-shell.md).
 
 Technology decision: [ADR 0001](decisions/0001-typescript-cross-platform-foundation.md).
 Package setup: Node 22.18+, strict TypeScript, `node:test`, no runtime dependencies.
@@ -195,8 +197,9 @@ facade later without changing UI code.
   accept/reject/cancel. Progress events are defined in `AppEvents`.
 - **Storage:** implement `StorageService` with the platform database; use
   `InMemoryStorage` for contract tests. Own all schemas and migrations.
-- **UI:** consume `MessengerApi`, `AppEvents` and `ModuleHealthReport`; use
-  `createMockMessengerApi()` for data. Never import storage or network internals.
+- **UI:** consume `MessengerApi`, `AppEvents` and `ModuleHealthReport`; the
+  wired shell does this in `app/src/integration/MessengerProvider.tsx` with
+  `createMockMessengerApi()`. Never import storage or network internals.
 
 ## Validation
 
@@ -207,9 +210,14 @@ npm test             # node:test; 74 tests (70 pre-existing + 4 messaging), no n
 npm run validate     # both
 ```
 
+The app has its own dependency lockfile and validation commands; see
+[Application shell](development/app-shell.md) and
+[Testing](../tests/README.md).
+
 ## Known limits
 
-- No real discovery, socket, database, UI shell or packaging yet.
+- No real discovery, socket, database, native packaging or real `MessengerApi`
+  adapter yet. The web UI shell exists in `app/` and uses mocks only.
 - `ApplicationHost` and the real `MessengerApi` integration adapter are
   contracts only; the mock implements the latter for UI development.
 - No delivery receipts, read receipts or transfer resumption protocol is
