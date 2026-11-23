@@ -10,7 +10,7 @@ Orientation for contributors and AI agents. Detail lives in [module boundaries](
 
 ## Independent module development
 
-Modules are implemented against shared interfaces, not each other's internals. Agree contracts in `shared/` first. Each module can be built and tested on its own; failures are reported through module health/status without cascading.
+Modules are implemented against shared interfaces, not each other's internals. The stable contracts now live in `shared/contracts`; see [Core Foundation](../foundation.md) for the handoff table. Each module can be built and tested on its own; failures are reported through module health/status without cascading.
 
 ## Mock-based development
 
@@ -19,6 +19,8 @@ Every module needs mock dependencies so work doesn't wait on others: mock discov
 ## Testing expectations
 
 Unit, module, mock, and integration tests; later cross-device LAN and failure/recovery tests. Do not claim untested functionality works — see [tests/README.md](../../tests/README.md).
+
+Current local validation: `npm install` then `npm run validate` (TypeScript check + `node:test`, no network or devices).
 
 ## Incremental integration
 

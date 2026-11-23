@@ -1,14 +1,14 @@
 # Planned modules
 
-Module directories under `modules/` are organizational placeholders only — no implementation exists yet. Shared contracts live in `shared/`; boundaries are detailed in [module boundaries](../../project/module-boundaries.md).
+Module directories under `modules/` contain the Core & Foundation implementation; every other directory is an organizational placeholder for its owner. Shared contracts live in `shared/contracts`, common types in `shared/types`, and mock implementations in `shared/mocks`. Boundaries are detailed in [module boundaries](../../project/module-boundaries.md); public interfaces and handoff guidance are in [Core Foundation](../foundation.md).
 
 ## Core & Foundation
 
 - **Responsibility:** application lifecycle, shared contracts, common types, local identity, configuration, module registration/health, events, errors, coordination.
-- **Scope:** small Level 0 base that other modules can depend on; mock-friendly from day one.
+- **Scope:** Level 0 implementation is complete: shared contracts, errors, config, logging, events, lifecycle, clock and identity; see [Core Foundation](../foundation.md).
 - **Depends on:** platform/storage interfaces it defines itself; nothing else.
 - **Must not own:** networking, chat rules, group rules, transfer logic, UI widgets.
-- **Testing:** lifecycle, identity persistence contract, module init/failure isolation, event contracts.
+- **Testing:** lifecycle, identity persistence contract, module init/failure isolation, event contracts — implemented in `tests/`.
 
 ## Peer Discovery & Network Core
 
@@ -50,4 +50,4 @@ Module directories under `modules/` are organizational placeholders only — no 
 - **Must not own:** network or feature business logic.
 - **Testing:** persistence across restarts, malformed/corrupt data handling, failure reporting and recovery.
 
-Five agents can prepare Core, Network, Messaging, Groups, and File Transfer in parallel; Storage is shared infrastructure with boundaries agreed before implementation. No individuals are assigned here.
+Five agents can prepare Core, Network, Messaging, Groups, and File Transfer in parallel; Storage is shared infrastructure with boundaries agreed before implementation. Core, its contracts and its mocks are implemented; the other module directories remain unassigned placeholders.

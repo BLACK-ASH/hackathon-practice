@@ -1,6 +1,10 @@
 # Architecture
 
-This document records architectural goals and boundaries. Technology choices are intentionally **not finalized**; they belong in [decisions](../decisions/README.md) once agreed.
+This document records architectural goals and boundaries. The Level 0
+language/tooling decision is in
+[ADR 0001](decisions/0001-typescript-cross-platform-foundation.md); the
+implemented foundation and its contracts are in
+[Core Foundation](../foundation.md). UI shell packaging is deferred to M1.
 
 ## Goals
 
