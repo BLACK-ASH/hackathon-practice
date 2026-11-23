@@ -17,15 +17,18 @@ function walk(directory: string): string[] {
   return files;
 }
 
-function importsOf(file: string): string[] {
-  const source = readFileSync(file, 'utf8');
+export function specifiersFromSource(source: string): string[] {
   const specifiers: string[] = [];
-  const pattern = /(?:from\s+|import\s*\()['"]([^'"]+)['"]/g;
+  const pattern = /(?:from\s+|import\s*\(|import\s+)['"]([^'"]+)['"]/g;
   for (const match of source.matchAll(pattern)) {
     const specifier = match[1];
     if (specifier !== undefined) specifiers.push(specifier);
   }
   return specifiers;
+}
+
+function importsOf(file: string): string[] {
+  return specifiersFromSource(readFileSync(file, 'utf8'));
 }
 
 function filesUnder(directory: string): string[] {
@@ -74,6 +77,18 @@ test('mocks never import feature modules', () => {
       );
     }
   }
+});
+
+test('boundary scanner detects side-effect imports too', () => {
+  const specifiers = specifiersFromSource(
+    "import '#core/index.ts';\nimport type { Clock } from '#types/time.ts';\nawait import('#mocks/index.ts');",
+  );
+
+  assert.deepEqual(specifiers, [
+    '#core/index.ts',
+    '#types/time.ts',
+    '#mocks/index.ts',
+  ]);
 });
 
 test('shared contract helpers are importable at runtime', async () => {

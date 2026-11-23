@@ -48,6 +48,10 @@ export interface FileTransferService {
   readonly events: EventBus<AppEvents>;
 
   send(peerId: PeerId, file: FileSource): Promise<FileTransferRecord>;
+  /** Accepts a pending incoming transfer announced by `files.transfer.requested`. */
+  acceptTransfer(transferId: TransferId): Promise<FileTransferRecord>;
+  /** Rejects a pending incoming transfer. */
+  rejectTransfer(transferId: TransferId): Promise<FileTransferRecord>;
   cancel(transferId: TransferId): Promise<void>;
   listTransfers(): Promise<readonly FileTransferRecord[]>;
   getTransfer(id: TransferId): Promise<FileTransferRecord | undefined>;

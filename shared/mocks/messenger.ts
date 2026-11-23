@@ -14,7 +14,7 @@ import type { ModuleHealthReport } from '#contracts/lifecycle.ts';
 import type { PeerIdentity, IdentityService } from '#contracts/identity.ts';
 import type { PeerInfo } from '#contracts/peer.ts';
 import type { IdGenerator } from '#contracts/ids.ts';
-import type { ConversationId, GroupId, MessageId, PeerId } from '#types/ids.ts';
+import type { ConversationId, GroupId, MessageId, PeerId, TransferId } from '#types/ids.ts';
 import { AppError } from '#core/errors.ts';
 import { TypedEventBus } from '#core/events.ts';
 import { createIdentityService } from '#core/identity.ts';
@@ -63,6 +63,7 @@ function requireGroupName(name: string): string {
  */
 export class MockMessengerApi implements MessengerApi {
   readonly events: EventBus<AppEvents>;
+  // Test-only handles. UI code must use MessengerApi, events and health only.
   readonly storage: InMemoryStorage;
   readonly network: MockPeerNetwork;
   readonly identity: IdentityService;
@@ -289,6 +290,18 @@ export class MockMessengerApi implements MessengerApi {
     return transfer;
   }
 
+  async acceptFileTransfer(
+    transferId: TransferId,
+  ): Promise<FileTransferRecord> {
+    return this.resolveTransfer(transferId, 'completed');
+  }
+
+  async rejectFileTransfer(
+    transferId: TransferId,
+  ): Promise<FileTransferRecord> {
+    return this.resolveTransfer(transferId, 'cancelled');
+  }
+
   async listTransfers(): Promise<readonly FileTransferRecord[]> {
     return this.storage.transfers.list();
   }
@@ -438,6 +451,30 @@ export class MockMessengerApi implements MessengerApi {
     };
     await this.storage.transfers.save(transfer);
     this.clock.set(start + 360_000);
+  }
+
+  private async resolveTransfer(
+    transferId: TransferId,
+    state: 'completed' | 'cancelled',
+  ): Promise<FileTransferRecord> {
+    const current = await this.storage.transfers.get(transferId);
+    if (current === undefined) {
+      throw new AppError('not_found', `Transfer "${transferId}" does not exist`);
+    }
+    if (current.state !== 'pending') {
+      throw new AppError('conflict', `Transfer "${transferId}" is not pending`);
+    }
+    const now = this.clock.now();
+    const updated: FileTransferRecord = {
+      ...current,
+      state,
+      updatedAt: now,
+      transferredBytes: state === 'completed' ? current.size : current.transferredBytes,
+      ...(state === 'completed' ? { completedAt: now } : {}),
+    };
+    await this.storage.transfers.save(updated);
+    this.events.emit('files.transfer.updated', updated);
+    return updated;
   }
 
   private async getOrCreatePrivateConversation(

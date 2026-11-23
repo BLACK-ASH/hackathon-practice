@@ -65,6 +65,7 @@ export interface AppEvents {
   'groups.group.removed': { readonly groupId: GroupId };
   'groups.message.received': ChatMessage;
 
+  'files.transfer.requested': FileTransferRecord;
   'files.transfer.updated': FileTransferRecord;
   'files.transfer.progress': FileTransferProgress;
 

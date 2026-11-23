@@ -133,6 +133,36 @@ test('file sending creates a transfer record without blocking messaging', async 
   );
 });
 
+test('pending transfers can be accepted or rejected through the UI facade', async () => {
+  const api = await createMockMessengerApi();
+  const now = api.getModuleHealth()[0]?.updatedAt ?? 0;
+  const pending = {
+    id: 'xfer_pending',
+    peerId: 'peer_aisha',
+    direction: 'incoming' as const,
+    fileName: 'notes.txt',
+    size: 10,
+    transferredBytes: 0,
+    state: 'pending' as const,
+    createdAt: now,
+    updatedAt: now,
+  };
+  await api.storage.transfers.save(pending);
+
+  const accepted = await api.acceptFileTransfer(pending.id);
+  assert.equal(accepted.state, 'completed');
+  assert.equal(accepted.transferredBytes, 10);
+
+  await assert.rejects(
+    api.rejectFileTransfer(pending.id),
+    (error: { code?: string }) => error.code === 'conflict',
+  );
+
+  await api.storage.transfers.save({ ...pending, id: 'xfer_rejected' });
+  const rejected = await api.rejectFileTransfer('xfer_rejected');
+  assert.equal(rejected.state, 'cancelled');
+});
+
 test('display name changes are reflected in identity and peers are unchanged', async () => {
   const api = await createMockMessengerApi();
   const before = api.listPeers().length;

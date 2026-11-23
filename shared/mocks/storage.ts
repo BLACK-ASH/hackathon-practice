@@ -54,10 +54,7 @@ function sortMessages(
   }
   if (query?.limit !== undefined) {
     if (query.limit === 0) return [];
-    list =
-      query.before !== undefined
-        ? list.slice(-query.limit)
-        : list.slice(0, query.limit);
+    list = list.slice(-query.limit);
   }
   return list;
 }

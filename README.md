@@ -9,7 +9,7 @@ Make local peer-to-peer communication simple enough for anyone to use: open the 
 ## Status
 
 **Level 0 (Core Foundation) is implemented and validated.** Shared contracts, a
-small core library, mock infrastructure and 65 deterministic tests are in
+small core library, mock infrastructure and 69 deterministic tests are in
 place. Feature directories are still placeholders: peer discovery, chat, groups,
 file transfer, the database and the UI shell are not implemented yet.
 

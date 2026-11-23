@@ -88,10 +88,10 @@ test('messages are ordered, filterable and limit from the newest end', async () 
     ['m2'],
   );
   assert.deepEqual(
-    (await storage.messages.listByConversation('dm:p1', { after: 10, limit: 5 })).map(
+    (await storage.messages.listByConversation('dm:p1', { after: 10, limit: 1 })).map(
       (item) => item.id,
     ),
-    ['m2', 'm3'],
+    ['m3'],
   );
   assert.deepEqual(
     await storage.messages.listByConversation('dm:p1', { limit: 0 }),

@@ -42,6 +42,18 @@ test('AppError.from preserves AppError and wraps unknown errors', () => {
   assert.equal(info.retryable, false);
 });
 
+test('AppError.from can hide raw platform details behind a safe message', () => {
+  const wrapped = AppError.from(
+    new Error('connect 10.0.0.4:5000 /home/user/key.pem'),
+    'io',
+    'Connection failed',
+  );
+
+  assert.equal(wrapped.message, 'Connection failed');
+  assert.equal(wrapped.toInfo().message, 'Connection failed');
+  assert.match(String(wrapped.cause), /10\.0\.0\.4/);
+});
+
 test('result helpers discriminate correctly', () => {
   const success = ok(42);
   const failure = err(new AppError('invalid_argument', 'bad'));
@@ -121,4 +133,18 @@ test('withTimeout aborts the underlying operation on timeout', async () => {
     ),
   );
   assert.equal(controller.signal.aborted, true);
+});
+
+test('a throwing timeout hook cannot escape the timer callback', async () => {
+  await assert.rejects(
+    withTimeout(
+      new Promise((resolve) => setTimeout(resolve, 100)),
+      5,
+      () => {
+        throw new Error('hook failed');
+      },
+    ),
+    (error: unknown) =>
+      error instanceof AppError && error.code === 'timeout',
+  );
 });
