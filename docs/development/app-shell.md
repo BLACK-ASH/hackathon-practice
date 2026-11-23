@@ -26,14 +26,16 @@ No runtime network request is made. Dependencies are needed only for installatio
 
 - `src/main.tsx` — mounts `<App />` inside `<MessengerProvider>`.
 - `src/App.tsx` — owns `HashRouter`, the shell layout and the route table.
-- `src/integration/MessengerProvider.tsx` — the only UI-to-Core adapter; loads facade data, subscribes to `AppEvents`, exposes `useMessenger()`.
-- `src/integration/MessengerProvider.test.tsx` — Core mock, loading, error and profile-update integration tests.
+- `src/integration/MessengerProvider.tsx` — the only UI-to-Core adapter; loads facade data, subscribes to `AppEvents`, exposes `useMessenger()`, and coordinates peer connection actions.
+- `src/integration/MessengerProvider.test.tsx` — Core mock, loading, error, profile-update and peer connection integration tests.
 - `src/integration/boundaries.test.ts` — enforces public aliases and forbids runtime network APIs.
 - `src/shell/navigation.ts` — single source of truth for destination labels, paths and icons.
 - `src/shell/AppShell.tsx` — separates persistent navigation from routed main content.
 - `src/shell/SidebarNav.tsx` — desktop sidebar; collapses to an icon rail on tablet.
 - `src/shell/MobileNav.tsx` / `MobileDrawer.tsx` — compact bottom navigation and drawer on mobile.
-- `src/pages/ChatsPage.tsx`, `NearbyPage.tsx`, `GroupsPage.tsx`, `TransfersPage.tsx`, `SettingsPage.tsx` — read-only Core-backed mock pages.
+- `src/pages/ChatsPage.tsx`, `GroupsPage.tsx`, `TransfersPage.tsx`, `SettingsPage.tsx` — read-only Core-backed mock pages.
+- `src/pages/NearbyPage.tsx` — thin route adapter for the peer directory.
+- `src/peers/` — module-local peer directory UI: list, cards, inline details, connect/disconnect actions, status helpers, styles and tests.
 - `src/components/PageState.tsx` — shared loading, error and empty states.
 - `src/pages/PlaceholderPage.tsx` — retained as a reference for future module-owned screens; not routed.
 - `src/pages/NotFoundPage.tsx` — unknown-route recovery.
@@ -45,7 +47,7 @@ No runtime network request is made. Dependencies are needed only for installatio
 |---|---|---|
 | `/` | Redirects to `/chats` | — |
 | `/chats` | Chats | Mock conversations from `listConversations()` |
-| `/nearby` | Nearby Devices | Mock peers and connection states from `listPeers()` |
+| `/nearby` | Nearby Devices | Peer directory from `listPeers()` with availability, connection state, last seen, inline details and connect/disconnect actions |
 | `/groups` | Groups | Mock groups from `listGroups()` |
 | `/transfers` | File Transfers | Mock transfer records from `listTransfers()` |
 | `/settings` | Settings | Mock identity/profile and module health; display name update via `updateDisplayName()` |
@@ -62,9 +64,15 @@ No runtime network request is made. Dependencies are needed only for installatio
 - `AppError` and `toErrorInfo()` from `#core/index.ts`, plus `toUiErrorInfo()` for unknown failures.
 - `createMockMessengerApi()` from `#mocks/index.ts` when no real facade is injected.
 
-It calls `getIdentity()`, `listConversations()`, `listGroups()`, `listTransfers()`, `listPeers()` and `getModuleHealth()`. It subscribes to `core.module.health`, `identity.changed`, peer/connection events, messaging events, group events, transfer events and `storage.error`.
+It calls `getIdentity()`, `listConversations()`, `listGroups()`, `listTransfers()`, `listPeers()`, `getModuleHealth()`, `connect()` and `disconnect()`. It subscribes to `core.module.health`, `identity.changed`, peer/connection events, messaging events, group events, transfer events and `storage.error`. Connection actions expose per-peer pending state and safe error messages through `useMessenger()`.
 
 `app/src/test/renderApp.tsx` accepts an optional `MessengerApi` plus a `mock` flag, so real and mock facades can be injected in tests without changing page components.
+
+## Peer directory
+
+`NearbyPage` renders `PeerDirectory`, which reads `peers`, `state`, `error`, `pendingPeerIds` and `connectionErrors` from `useMessenger()`. It uses `PeerInfo` directly; there is no second peer model. `peerStatus.ts` maps availability and connection state to user-facing labels, accessible badge names and neutral/error/positive/pending tones. The directory shows device name, platform, availability, connection state, discovered time and last seen time, plus accessible inline details. It sorts connected peers first, then connecting/reconnecting, disconnected/available and offline peers, and it closes details if a peer disappears from a refreshed snapshot.
+
+Connection buttons call `MessengerProvider` actions, which delegate to `MessengerApi.connect()` and `MessengerApi.disconnect()`. The provider marks the peer as pending, clears any previous action error, refreshes the snapshot after the action, and converts failures to safe `ErrorInfo` messages. `PeerCard` shows the per-peer error and disables actions while pending, while connecting, or for offline peers. The UI does not import `MockPeerNetwork` or expose IP addresses, ports or raw network errors.
 
 ## Mock-only behavior
 

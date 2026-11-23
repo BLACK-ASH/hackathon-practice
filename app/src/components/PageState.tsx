@@ -19,8 +19,8 @@ export function PageState({ title, children, tone = 'neutral' }: PageStateProps)
   );
 }
 
-export function LoadingState() {
-  return <PageState title="Loading mock data">Preparing the local preview…</PageState>;
+export function LoadingState({ title = 'Loading mock data' }: { readonly title?: string }) {
+  return <PageState title={title}>Preparing the local preview…</PageState>;
 }
 
 export function ErrorState({ message }: { readonly message: string }) {
