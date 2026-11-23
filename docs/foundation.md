@@ -180,9 +180,12 @@ facade later without changing UI code.
 - **Network:** implement `PeerNetwork` with platform adapters; use
   `MockPeerNetwork` as the behavioral reference for discovery, reconnect,
   timeouts and failure states. No Core change is needed.
-- **Messaging:** inject `PeerNetwork` and `StorageService`; use `CHANNELS.messaging`,
-  `privateConversationId()`, mock peers and `deliverDuplicate()` for success,
-  delay, failure, duplicate and offline scenarios.
+- **Messaging:** implemented in `modules/messaging` as `MessagingEngine`; inject
+  `PeerNetwork`, `StorageService`, `IdentityService`, `IdGenerator` and `Clock`.
+  It uses `CHANNELS.messaging` and `privateConversationId()` for private chats,
+  with duplicate detection, failed-send retry, best-effort receipts and local
+  history through the storage contract. Tests use `MockPeerNetwork` and
+  `InMemoryStorage`; no UI or real transport is included.
 - **Groups:** inject `PeerNetwork` and `StorageService`; use `CHANNELS.groups`,
   `GroupInfo`, `groupConversationId()` and per-member `send()` calls so one
   failure cannot block others.
@@ -200,7 +203,7 @@ facade later without changing UI code.
 ```bash
 npm install          # two dev dependencies only
 npm run typecheck    # tsc --noEmit
-npm test             # node:test; 69 tests, no network or devices
+npm test             # node:test; 74 tests (70 pre-existing + 4 messaging), no network or devices
 npm run validate     # both
 ```
 
