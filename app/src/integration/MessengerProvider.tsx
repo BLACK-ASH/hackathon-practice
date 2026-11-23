@@ -2,13 +2,13 @@ import { createMockMessengerApi } from '#mocks/index.ts';
 import { AppError } from '#core/index.ts';
 import type { MessengerApi } from '#contracts/app.ts';
 import type { ErrorInfo } from '#contracts/errors.ts';
-import type { GroupInfo } from '#contracts/groups.ts';
+import type { CreateGroupInput, GroupInfo } from '#contracts/groups.ts';
 import type { ModuleHealthReport } from '#contracts/lifecycle.ts';
 import type { ChatMessage, Conversation } from '#contracts/messaging.ts';
 import type { PeerIdentity } from '#contracts/identity.ts';
 import type { PeerInfo } from '#contracts/peer.ts';
 import type { FileTransferRecord } from '#contracts/files.ts';
-import type { ConversationId, PeerId } from '#types/ids.ts';
+import type { ConversationId, GroupId, PeerId } from '#types/ids.ts';
 import { toUiErrorInfo } from './errors.ts';
 import {
   createContext,
@@ -28,6 +28,8 @@ export interface MessengerSnapshot {
   readonly messages: readonly ChatMessage[];
   readonly messageErrors: Readonly<Partial<Record<ConversationId, ErrorInfo>>>;
   readonly groups: readonly GroupInfo[];
+  readonly groupMessages: readonly ChatMessage[];
+  readonly groupMessageErrors: Readonly<Partial<Record<GroupId, ErrorInfo>>>;
   readonly transfers: readonly FileTransferRecord[];
   readonly health: readonly ModuleHealthReport[];
 }
@@ -44,6 +46,8 @@ interface MessengerContextValue extends MessengerSnapshot {
   disconnectFromPeer(peerId: PeerId): Promise<void>;
   sendMessage(conversationId: ConversationId, body: string): Promise<void>;
   markConversationRead(conversationId: ConversationId): Promise<void>;
+  createGroup(input: CreateGroupInput): Promise<GroupInfo>;
+  sendGroupMessage(groupId: GroupId, body: string): Promise<void>;
 }
 
 const emptySnapshot: MessengerSnapshot = {
@@ -53,6 +57,8 @@ const emptySnapshot: MessengerSnapshot = {
   messages: [],
   messageErrors: {},
   groups: [],
+  groupMessages: [],
+  groupMessageErrors: {},
   transfers: [],
   health: [],
 };
@@ -122,20 +128,39 @@ export function MessengerProvider({ children, api, mock }: MessengerProviderProp
         activeApi.listGroups(),
         activeApi.listTransfers(),
       ]);
-      const messageErrors: Partial<Record<ConversationId, ErrorInfo>> = {};
-      const messageLists = await Promise.all(
-        conversations.map(async (conversation) => {
-          try {
-            return await activeApi.listMessages(conversation.id);
-          } catch (reason: unknown) {
-            messageErrors[conversation.id] = toUiErrorInfo(
-              reason,
-              'Message history could not be loaded.',
-            );
-            return [];
-          }
-        }),
+      const privateConversations = conversations.filter(
+        (conversation) => conversation.kind === 'private',
       );
+      const messageErrors: Partial<Record<ConversationId, ErrorInfo>> = {};
+      const groupMessageErrors: Partial<Record<GroupId, ErrorInfo>> = {};
+      const [messageLists, groupMessageLists] = await Promise.all([
+        Promise.all(
+          privateConversations.map(async (conversation) => {
+            try {
+              return await activeApi.listMessages(conversation.id);
+            } catch (reason: unknown) {
+              messageErrors[conversation.id] = toUiErrorInfo(
+                reason,
+                'Message history could not be loaded.',
+              );
+              return [];
+            }
+          }),
+        ),
+        Promise.all(
+          groups.map(async (group) => {
+            try {
+              return await activeApi.listGroupMessages(group.id);
+            } catch (reason: unknown) {
+              groupMessageErrors[group.id] = toUiErrorInfo(
+                reason,
+                'Group history could not be loaded.',
+              );
+              return [];
+            }
+          }),
+        ),
+      ]);
 
       setSnapshot({
         identity,
@@ -144,6 +169,8 @@ export function MessengerProvider({ children, api, mock }: MessengerProviderProp
         messages: mergeMessages(messageLists),
         messageErrors,
         groups,
+        groupMessages: mergeMessages(groupMessageLists),
+        groupMessageErrors,
         transfers,
         health: activeApi.getModuleHealth(),
       });
@@ -280,6 +307,29 @@ export function MessengerProvider({ children, api, mock }: MessengerProviderProp
     [activeApi, reload],
   );
 
+  const createGroup = useCallback(
+    async (input: CreateGroupInput) => {
+      if (!activeApi) {
+        throw new AppError('unavailable', 'Messenger service is not ready.');
+      }
+      const group = await activeApi.createGroup(input);
+      await reload();
+      return group;
+    },
+    [activeApi, reload],
+  );
+
+  const sendGroupMessage = useCallback(
+    async (groupId: GroupId, body: string) => {
+      if (!activeApi) {
+        throw new AppError('unavailable', 'Messenger service is not ready.');
+      }
+      await activeApi.sendGroupMessage(groupId, body);
+      await reload();
+    },
+    [activeApi, reload],
+  );
+
   const updateDisplayName = useCallback(
     async (displayName: string) => {
       if (!activeApi) {
@@ -306,6 +356,8 @@ export function MessengerProvider({ children, api, mock }: MessengerProviderProp
         disconnectFromPeer,
         sendMessage,
         markConversationRead,
+        createGroup,
+        sendGroupMessage,
       }}
     >
       {children}

@@ -8,9 +8,9 @@ Make local peer-to-peer communication simple enough for anyone to use: open the 
 
 ## Status
 
-**Level 0 Core Foundation and the Level 0 UI shell are implemented and validated.** Shared contracts, the core library, mock infrastructure and 74 root tests are in place. The independent Level 2 private-messaging engine adds 4 module tests. The UI shell in `app/` is wired to the Core `MessengerApi` mock facade and has 54 Vitest tests; it includes a working mock-backed inbox and one-to-one chat.
+**Level 0 Core Foundation and the Level 0 UI shell are implemented and validated.** Shared contracts, the core library, mock infrastructure and 74 root tests are in place. The independent Level 2 private-messaging engine adds 4 module tests. The UI shell in `app/` is wired to the Core `MessengerApi` mock facade and has 65 Vitest tests; it includes mock-backed inbox, one-to-one chat, and group creation, listing and chat.
 
-Real peer discovery/network, durable storage, groups, file transfer and the real integration facade are not implemented. The UI displays clearly labeled mock data; it does not send real messages, discover real peers or transfer real files.
+Real peer discovery/network, durable storage, real group distribution, file transfer and the real integration facade are not implemented. The UI displays clearly labeled mock data; it does not send real messages, discover real peers or transfer real files.
 
 ```bash
 # Core Foundation (root)
@@ -48,7 +48,7 @@ One shared codebase for desktop and mobile where practical, with platform-specif
 
 ## Architecture overview
 
-- `app/` — web UI shell: responsive navigation, Core-backed mock pages, mock-backed private chat and focused UI tests.
+- `app/` — web UI shell: responsive navigation, Core-backed mock pages, mock-backed private chat and group UI, and focused UI tests.
 - `modules/` — independent modules: core and private messaging implemented, with placeholders for network, groups, file-transfer and storage.
 - `shared/` — agreed contracts and types (`shared/contracts`, `shared/types`) plus mock implementations for parallel development (`shared/mocks`).
 - `docs/` — architecture, module, development, decision and foundation documentation.
