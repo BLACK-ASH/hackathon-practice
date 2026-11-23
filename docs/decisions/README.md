@@ -1,6 +1,6 @@
 # Architecture decision records
 
-Lightweight decision log for choices that affect architecture, interfaces, dependencies, or platforms. **No technical decisions have been finalized during scaffolding.**
+Lightweight decision log for choices that affect architecture, interfaces, dependencies, or platforms. [ADR 0001](0001-technology-stack.md) records the approved baseline technology stack. Additional architectural decisions remain deferred or pending; new decisions should be recorded through this project's decision process.
 
 ## When to write one
 

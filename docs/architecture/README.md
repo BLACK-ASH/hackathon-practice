@@ -1,6 +1,6 @@
 # Architecture
 
-This document records architectural goals and boundaries. Technology choices are intentionally **not finalized**; they belong in [decisions](../decisions/README.md) once agreed.
+This document records architectural goals and boundaries. The initial technology stack is formally recorded in [ADR 0001](../decisions/0001-technology-stack.md). Explicitly deferred architectural decisions remain open, and future technology changes require documented decisions.
 
 ## Goals
 
