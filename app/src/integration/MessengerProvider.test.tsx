@@ -73,7 +73,7 @@ describe('Core-backed UI integration', () => {
     const view = renderApp('/settings', api, true);
 
     const input = await screen.findByLabelText('Display name');
-    expect(input).toHaveValue('You');
+    await waitFor(() => expect(input).toHaveValue('You'));
     expect(api.events.listenerCount('identity.changed')).toBeGreaterThan(0);
 
     await api.updateDisplayName('Event User');
@@ -89,7 +89,7 @@ describe('Core-backed UI integration', () => {
     renderApp('/settings', api, true);
 
     const input = await screen.findByLabelText('Display name');
-    expect(input).toHaveValue('You');
+    await waitFor(() => expect(input).toHaveValue('You'));
 
     await user.clear(input);
     await user.type(input, 'Arshad');
@@ -99,5 +99,45 @@ describe('Core-backed UI integration', () => {
       await screen.findByText('Display name updated in the mock session.'),
     ).toBeInTheDocument();
     expect((await api.getIdentity()).displayName).toBe('Arshad');
+  });
+
+  it('connects and disconnects a peer through the Core facade', async () => {
+    const user = userEvent.setup();
+    const api = await createMockMessengerApi();
+    const connectSpy = vi.spyOn(api, 'connect');
+    const disconnectSpy = vi.spyOn(api, 'disconnect');
+    renderApp('/nearby', api, true);
+
+    await user.click(await screen.findByRole('button', { name: 'Connect to Aisha' }));
+
+    expect(connectSpy).toHaveBeenCalledWith('peer_aisha');
+    expect(api.network.getConnection('peer_aisha')?.state).toBe('connected');
+    expect(
+      await screen.findByRole('button', { name: 'Disconnect from Aisha' }),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Disconnect from Aisha' }));
+
+    expect(disconnectSpy).toHaveBeenCalledWith('peer_aisha');
+    expect(api.network.getConnection('peer_aisha')?.state).toBe('disconnected');
+    expect(
+      await screen.findByRole('button', { name: 'Connect to Aisha' }),
+    ).toBeInTheDocument();
+  });
+
+  it('shows a safe per-peer error when connecting fails', async () => {
+    const user = userEvent.setup();
+    const api = await createMockMessengerApi();
+    vi.spyOn(api, 'connect').mockRejectedValueOnce(
+      new Error('connect ECONNREFUSED 192.168.1.4:7000'),
+    );
+    renderApp('/nearby', api, true);
+
+    await user.click(await screen.findByRole('button', { name: 'Connect to Aisha' }));
+
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('Connection could not be updated.');
+    expect(alert).not.toHaveTextContent('ECONNREFUSED');
+    expect(alert).not.toHaveTextContent('192.168.1.4');
   });
 });

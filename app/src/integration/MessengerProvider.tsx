@@ -8,6 +8,7 @@ import type { Conversation } from '#contracts/messaging.ts';
 import type { PeerIdentity } from '#contracts/identity.ts';
 import type { PeerInfo } from '#contracts/peer.ts';
 import type { FileTransferRecord } from '#contracts/files.ts';
+import type { PeerId } from '#types/ids.ts';
 import { toUiErrorInfo } from './errors.ts';
 import {
   createContext,
@@ -33,8 +34,12 @@ interface MessengerContextValue extends MessengerSnapshot {
   readonly state: MessengerLoadState;
   readonly error: ErrorInfo | undefined;
   readonly isMock: boolean;
+  readonly pendingPeerIds: readonly PeerId[];
+  readonly connectionErrors: Readonly<Partial<Record<PeerId, ErrorInfo>>>;
   reload(): Promise<void>;
   updateDisplayName(displayName: string): Promise<void>;
+  connectToPeer(peerId: PeerId): Promise<void>;
+  disconnectFromPeer(peerId: PeerId): Promise<void>;
 }
 
 const emptySnapshot: MessengerSnapshot = {
@@ -58,9 +63,15 @@ export function MessengerProvider({ children, api, mock }: MessengerProviderProp
   const [state, setState] = useState<MessengerLoadState>('loading');
   const [snapshot, setSnapshot] = useState<MessengerSnapshot>(emptySnapshot);
   const [error, setError] = useState<ErrorInfo | undefined>(undefined);
+  const [pendingPeerIds, setPendingPeerIds] = useState<readonly PeerId[]>([]);
+  const [connectionErrors, setConnectionErrors] = useState<
+    Readonly<Partial<Record<PeerId, ErrorInfo>>>
+  >({});
   const isMock = api === undefined ? true : mock === true;
 
   useEffect(() => {
+    setPendingPeerIds([]);
+    setConnectionErrors({});
     if (api) {
       setActiveApi(api);
       return;
@@ -144,6 +155,75 @@ export function MessengerProvider({ children, api, mock }: MessengerProviderProp
     };
   }, [activeApi, reload]);
 
+  const setPeerPending = useCallback((peerId: PeerId, pending: boolean) => {
+    setPendingPeerIds((current) =>
+      pending
+        ? current.includes(peerId)
+          ? current
+          : [...current, peerId]
+        : current.filter((id) => id !== peerId),
+    );
+  }, []);
+
+  const setPeerError = useCallback(
+    (peerId: PeerId, error: ErrorInfo | undefined) => {
+      setConnectionErrors((current) => {
+        const next: Partial<Record<string, ErrorInfo>> = { ...current };
+        if (error === undefined) delete next[peerId];
+        else next[peerId] = error;
+        return next;
+      });
+    },
+    [],
+  );
+
+  const runPeerAction = useCallback(
+    async (
+      peerId: PeerId,
+      action: (facade: MessengerApi) => Promise<unknown>,
+      fallbackMessage: string,
+    ) => {
+      if (!activeApi) {
+        setPeerError(
+          peerId,
+          toUiErrorInfo(
+            new AppError('unavailable', 'Messenger service is not ready.'),
+            fallbackMessage,
+          ),
+        );
+        return;
+      }
+
+      setPeerPending(peerId, true);
+      setPeerError(peerId, undefined);
+      try {
+        await action(activeApi);
+        await reload();
+      } catch (reason: unknown) {
+        setPeerError(peerId, toUiErrorInfo(reason, fallbackMessage));
+      } finally {
+        setPeerPending(peerId, false);
+      }
+    },
+    [activeApi, reload, setPeerError, setPeerPending],
+  );
+
+  const connectToPeer = useCallback(
+    (peerId: PeerId) =>
+      runPeerAction(peerId, (facade) => facade.connect(peerId), 'Connection could not be updated.'),
+    [runPeerAction],
+  );
+
+  const disconnectFromPeer = useCallback(
+    (peerId: PeerId) =>
+      runPeerAction(
+        peerId,
+        (facade) => facade.disconnect(peerId),
+        'Connection could not be updated.',
+      ),
+    [runPeerAction],
+  );
+
   const updateDisplayName = useCallback(
     async (displayName: string) => {
       if (!activeApi) {
@@ -162,8 +242,12 @@ export function MessengerProvider({ children, api, mock }: MessengerProviderProp
         state,
         error,
         isMock,
+        pendingPeerIds,
+        connectionErrors,
         reload,
         updateDisplayName,
+        connectToPeer,
+        disconnectFromPeer,
       }}
     >
       {children}

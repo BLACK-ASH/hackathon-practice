@@ -54,10 +54,15 @@ npm run build        # tsc --noEmit && vite build
 | Suite | Covers |
 |---|---|
 | `src/App.test.tsx` | All five destinations, active navigation state, unknown-route recovery |
-| `src/integration/MessengerProvider.test.tsx` | Core mock peers/chats, pending state, user-safe error state, profile update via `MessengerApi` |
+| `src/integration/MessengerProvider.test.tsx` | Core mock peers/chats, pending state, user-safe error state, profile update and peer connect/disconnect via `MessengerApi` |
 | `src/integration/boundaries.test.ts` | Public aliases only, no unfinished module imports, no runtime network APIs |
+| `src/peers/peerStatus.test.ts` | User-facing status labels, availability labels, platform/device fallbacks and badge tones |
+| `src/peers/PeerCard.test.tsx` | Peer card content, accessible details toggle, connect/disconnect actions, pending state, safe action errors and offline state |
+| `src/peers/PeerDetails.test.tsx` | Inline details fields, accessible close button and optional-field fallbacks |
+| `src/peers/PeerDirectory.test.tsx` | Loading/empty/error/ready states, connection-first ordering, details lifecycle, peer refresh handling and action pass-through |
+| `src/pages/NearbyPage.test.tsx` | Route-level peer status rendering, Core event updates, peer disappearance and safe error display |
 
-Current results: root `74/74` passing; app `14/14` passing. No real LAN devices,
+Current results: root `74/74` passing; app `43/43` passing. No real LAN devices,
 native runtime, network sockets or external services are used.
 
 ## Planned levels
