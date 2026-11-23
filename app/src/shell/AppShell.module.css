@@ -1,0 +1,58 @@
+.shell {
+  display: flex;
+  min-height: 100dvh;
+  background: var(--surface-app);
+}
+
+.workspace {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.main {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  padding: var(--space-6);
+  overflow-x: hidden;
+}
+
+.main:focus {
+  outline: none;
+}
+
+.skipLink {
+  position: fixed;
+  top: var(--space-3);
+  left: -9999px;
+  z-index: 100;
+  padding: var(--space-2) var(--space-4);
+  color: #ffffff;
+  background: var(--brand-strong);
+  border: 0;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+}
+
+.skipLink:focus {
+  left: var(--space-3);
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .main {
+    padding: var(--space-5);
+  }
+}
+
+@media (max-width: 767px) {
+  .shell {
+    display: block;
+    padding-bottom: calc(64px + env(safe-area-inset-bottom));
+  }
+
+  .main {
+    padding: var(--space-4) var(--space-4) var(--space-6);
+  }
+}

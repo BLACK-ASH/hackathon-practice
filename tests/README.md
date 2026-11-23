@@ -2,17 +2,25 @@
 
 ## Current tooling
 
+There are two independently validated packages.
+
+### Core Foundation (root)
+
 Level 0 uses strict TypeScript and Node 22.18+'s built-in test runner and type
 stripping. There are no runtime dependencies and no build step.
 
 ```bash
 npm install
-npm test             # node --test
+npm test             # node --test tests/*.test.ts shared/mocks/test-context.ts
 npm run typecheck    # tsc --noEmit
 npm run validate     # both
 ```
 
-All current suites are deterministic, offline and device-free. They live next
+`npm test` is scoped explicitly so the Node runner does not discover the UI's
+Vitest files under `app/`. The mock-context smoke file is retained to preserve
+the established 69-test baseline.
+
+All root suites are deterministic, offline and device-free. They live next
 to this file:
 
 | Suite | Covers |
@@ -26,6 +34,30 @@ to this file:
 | `mock-storage.test.ts` | All repositories, ordering, cloning, failure injection |
 | `mock-messenger.test.ts` | Seeded UI facade, send/read/retry, groups, transfers, health |
 | `boundaries.test.ts` | Import-direction rules and runtime contract helpers |
+| `shared/mocks/test-context.ts` | Import smoke coverage for the shared mock wiring |
+
+### UI shell (`app/`)
+
+The shell uses strict TypeScript, Vitest 5, Testing Library and jsdom. It has
+its own dependency lockfile and is validated separately.
+
+```bash
+cd app
+npm ci
+npm run typecheck    # tsc --noEmit
+npm test             # vitest run
+npm run lint         # eslint .
+npm run build        # tsc --noEmit && vite build
+```
+
+| Suite | Covers |
+|---|---|
+| `src/App.test.tsx` | All five destinations, active navigation state, unknown-route recovery |
+| `src/integration/MessengerProvider.test.tsx` | Core mock peers/chats, pending state, user-safe error state, profile update via `MessengerApi` |
+| `src/integration/boundaries.test.ts` | Public aliases only, no unfinished module imports, no runtime network APIs |
+
+Current results: root `69/69` passing; app `14/14` passing. No real LAN devices,
+native runtime, network sockets or external services are used.
 
 ## Planned levels
 

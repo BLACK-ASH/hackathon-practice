@@ -4,7 +4,12 @@ Lightweight decision log for choices that affect architecture, interfaces, depen
 
 ## Decisions
 
-- [0001 — TypeScript foundation with platform adapters](0001-typescript-cross-platform-foundation.md) (accepted for Level 0; UI shell deferred to M1).
+- [0001 — TypeScript foundation with platform adapters](0001-typescript-cross-platform-foundation.md) (accepted for Level 0).
+- [0002 — App shell UI stack](0002-app-shell-ui-stack.md) (accepted for the Level 0 web shell; provisional until team ratification).
+
+The shell decision was originally drafted as `0001` before Core's accepted
+`0001` landed. It was renumbered to `0002` during integration; no content was
+deleted.
 
 ## When to write one
 
@@ -12,7 +17,7 @@ When choosing a framework, transport/discovery mechanism, storage technology, se
 
 ## How to write one
 
-Add a numbered Markdown file here (for example `0001-transport-choice.md`) with:
+Add a numbered Markdown file here (for example `0003-transport-choice.md`) with:
 
 - **Decision** — what was chosen, in one sentence.
 - **Context** — the problem and constraints (offline, cross-platform, hackathon timeline, etc.).

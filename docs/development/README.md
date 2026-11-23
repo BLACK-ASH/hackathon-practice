@@ -16,11 +16,39 @@ Modules are implemented against shared interfaces, not each other's internals. T
 
 Every module needs mock dependencies so work doesn't wait on others: mock discovery/connections, mock transport (delay, failure, duplicates, offline), mock peers, and mock transfers. Mocks must be clearly labeled and swappable for real implementations via the same interfaces.
 
+The UI shell currently uses `createMockMessengerApi()` through
+`app/src/integration/MessengerProvider.tsx`. Replace that injection with a real
+`MessengerApi` implementation when one exists; page components do not change.
+
 ## Testing expectations
 
 Unit, module, mock, and integration tests; later cross-device LAN and failure/recovery tests. Do not claim untested functionality works — see [tests/README.md](../../tests/README.md).
 
-Current local validation: `npm install` then `npm run validate` (TypeScript check + `node:test`, no network or devices).
+Two validation surfaces are maintained:
+
+```bash
+# Core Foundation (root)
+npm install
+npm run validate
+
+# UI shell
+cd app
+npm ci
+npm run typecheck
+npm test
+npm run lint
+npm run build
+```
+
+The root test script explicitly targets `tests/*.test.ts` plus the existing
+`shared/mocks/test-context.ts` smoke file so Node's test runner does not pick up
+the app's Vitest suites.
+
+## Application shell
+
+See [Application shell](app-shell.md) for routes, layout, aliases and UI boundaries.
+See [Integration handoff](app-shell-integration-handoff.md) for how the shell
+connects to Core Foundation and what remains unresolved.
 
 ## Incremental integration
 
