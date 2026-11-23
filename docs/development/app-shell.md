@@ -26,15 +26,17 @@ No runtime network request is made. Dependencies are needed only for installatio
 
 - `src/main.tsx` — mounts `<App />` inside `<MessengerProvider>`.
 - `src/App.tsx` — owns `HashRouter`, the shell layout and the route table.
-- `src/integration/MessengerProvider.tsx` — the only UI-to-Core adapter; loads facade data, subscribes to `AppEvents`, exposes `useMessenger()`, and coordinates peer connection actions.
+- `src/integration/MessengerProvider.tsx` — the only UI-to-Core adapter; loads facade data and message history, subscribes to `AppEvents`, exposes `useMessenger()`, and coordinates peer connection and private message actions.
 - `src/integration/MessengerProvider.test.tsx` — Core mock, loading, error, profile-update and peer connection integration tests.
 - `src/integration/boundaries.test.ts` — enforces public aliases and forbids runtime network APIs.
 - `src/shell/navigation.ts` — single source of truth for destination labels, paths and icons.
 - `src/shell/AppShell.tsx` — separates persistent navigation from routed main content.
 - `src/shell/SidebarNav.tsx` — desktop sidebar; collapses to an icon rail on tablet.
 - `src/shell/MobileNav.tsx` / `MobileDrawer.tsx` — compact bottom navigation and drawer on mobile.
-- `src/pages/ChatsPage.tsx`, `GroupsPage.tsx`, `TransfersPage.tsx`, `SettingsPage.tsx` — read-only Core-backed mock pages.
+- `src/pages/ChatsPage.tsx` — thin route adapter for the private-message inbox.
+- `src/pages/GroupsPage.tsx`, `TransfersPage.tsx`, `SettingsPage.tsx` — read-only Core-backed mock pages.
 - `src/pages/NearbyPage.tsx` — thin route adapter for the peer directory.
+- `src/chat/` — module-local private chat UI: inbox, conversation thread, composer, status labels, styles and tests.
 - `src/peers/` — module-local peer directory UI: list, cards, inline details, connect/disconnect actions, status helpers, styles and tests.
 - `src/components/PageState.tsx` — shared loading, error and empty states.
 - `src/pages/PlaceholderPage.tsx` — retained as a reference for future module-owned screens; not routed.
@@ -46,7 +48,8 @@ No runtime network request is made. Dependencies are needed only for installatio
 | Path | Destination | Current content |
 |---|---|---|
 | `/` | Redirects to `/chats` | — |
-| `/chats` | Chats | Mock conversations from `listConversations()` |
+| `/chats` | Chats | Private inbox from `listConversations()` with previews, timestamps, peer identity and unread counts |
+| `/chats/:conversationId` | Chat | Stored one-to-one history from `listMessages()`, delivery status, composer and `sendMessage()` |
 | `/nearby` | Nearby Devices | Peer directory from `listPeers()` with availability, connection state, last seen, inline details and connect/disconnect actions |
 | `/groups` | Groups | Mock groups from `listGroups()` |
 | `/transfers` | File Transfers | Mock transfer records from `listTransfers()` |
@@ -60,11 +63,11 @@ No runtime network request is made. Dependencies are needed only for installatio
 `MessengerProvider` uses these public contracts:
 
 - `MessengerApi` from `#contracts/app.ts`.
-- `PeerInfo`, `PeerIdentity`, `Conversation`, `GroupInfo`, `FileTransferRecord` and `ModuleHealthReport` types from `#contracts/index.ts`.
+- `ChatMessage`, `Conversation`, `PeerInfo`, `PeerIdentity`, `GroupInfo`, `FileTransferRecord` and `ModuleHealthReport` types from `#contracts/index.ts`, plus `ConversationId` from `#types/ids.ts`.
 - `AppError` and `toErrorInfo()` from `#core/index.ts`, plus `toUiErrorInfo()` for unknown failures.
 - `createMockMessengerApi()` from `#mocks/index.ts` when no real facade is injected.
 
-It calls `getIdentity()`, `listConversations()`, `listGroups()`, `listTransfers()`, `listPeers()`, `getModuleHealth()`, `connect()` and `disconnect()`. It subscribes to `core.module.health`, `identity.changed`, peer/connection events, messaging events, group events, transfer events and `storage.error`. Connection actions expose per-peer pending state and safe error messages through `useMessenger()`.
+It calls `getIdentity()`, `listConversations()`, `listMessages()`, `sendMessage()`, `markConversationRead()`, `listGroups()`, `listTransfers()`, `listPeers()`, `getModuleHealth()`, `connect()` and `disconnect()`. It subscribes to `core.module.health`, `identity.changed`, peer/connection events, messaging events, group events, transfer events and `storage.error`. Message history is deduplicated by message ID, ordered by timestamp, and exposed with per-conversation load errors so a failed history read does not blank the inbox or other pages. Connection actions expose per-peer pending state; connection and message actions expose safe error messages through `useMessenger()`.
 
 `app/src/test/renderApp.tsx` accepts an optional `MessengerApi` plus a `mock` flag, so real and mock facades can be injected in tests without changing page components.
 
@@ -74,9 +77,19 @@ It calls `getIdentity()`, `listConversations()`, `listGroups()`, `listTransfers(
 
 Connection buttons call `MessengerProvider` actions, which delegate to `MessengerApi.connect()` and `MessengerApi.disconnect()`. The provider marks the peer as pending, clears any previous action error, refreshes the snapshot after the action, and converts failures to safe `ErrorInfo` messages. `PeerCard` shows the per-peer error and disables actions while pending, while connecting, or for offline peers. The UI does not import `MockPeerNetwork` or expose IP addresses, ports or raw network errors.
 
+## Private chat UI
+
+`ChatsPage` renders `Inbox`, which lists only private conversations in recency order with the peer's available identity details, latest preview, timestamp and unread badge. Selecting a conversation navigates to `/chats/:conversationId`; group conversations remain under the Groups destination for the later group-messaging module.
+
+`ChatPage` reads its conversation, message history and peer details from `useMessenger()`. It does not keep a second message store: messages are filtered from the provider's deduplicated snapshot. Opening a conversation with unread messages calls `markConversationRead()` through the provider. `messaging.message.received`, `messaging.message.updated` and `messaging.conversation.updated` refresh the same snapshot, so the inbox and open thread stay synchronized.
+
+The thread renders received and sent messages with timestamps, status labels and accessible message direction. The composer supports a disabled empty state, Enter to send, Shift+Enter for a newline, a pending state, safe failure messages, and clearing the draft only after a successful send. A failed history read is shown in the thread while the rest of the shell remains usable.
+
+`MockMessengerApi` has no dedicated incoming-message injection method. UI tests use its existing test-only storage handles plus the real `AppEvents` bus to simulate incoming messages and duplicate event delivery; no second mock transport or message store was added.
+
 ## Mock-only behavior
 
-Every data page says it is mock data. The shell does not send messages, discover peers, create real groups, transfer files or persist profile changes across restarts. No `fetch`, `WebSocket` or `EventSource` call is used; a boundary test enforces this.
+Every data page says it is mock data. Chat composer sends update only the in-memory mock facade and are visibly labeled as mock messages; they do not leave the process. The shell does not discover real peers, create real groups, transfer files or persist profile changes across restarts. No `fetch`, `WebSocket` or `EventSource` call is used; a boundary test enforces this.
 
 ## Build aliases
 

@@ -4,11 +4,11 @@ import type { MessengerApi } from '#contracts/app.ts';
 import type { ErrorInfo } from '#contracts/errors.ts';
 import type { GroupInfo } from '#contracts/groups.ts';
 import type { ModuleHealthReport } from '#contracts/lifecycle.ts';
-import type { Conversation } from '#contracts/messaging.ts';
+import type { ChatMessage, Conversation } from '#contracts/messaging.ts';
 import type { PeerIdentity } from '#contracts/identity.ts';
 import type { PeerInfo } from '#contracts/peer.ts';
 import type { FileTransferRecord } from '#contracts/files.ts';
-import type { PeerId } from '#types/ids.ts';
+import type { ConversationId, PeerId } from '#types/ids.ts';
 import { toUiErrorInfo } from './errors.ts';
 import {
   createContext,
@@ -25,6 +25,8 @@ export interface MessengerSnapshot {
   readonly identity: PeerIdentity | undefined;
   readonly peers: readonly PeerInfo[];
   readonly conversations: readonly Conversation[];
+  readonly messages: readonly ChatMessage[];
+  readonly messageErrors: Readonly<Partial<Record<ConversationId, ErrorInfo>>>;
   readonly groups: readonly GroupInfo[];
   readonly transfers: readonly FileTransferRecord[];
   readonly health: readonly ModuleHealthReport[];
@@ -40,16 +42,32 @@ interface MessengerContextValue extends MessengerSnapshot {
   updateDisplayName(displayName: string): Promise<void>;
   connectToPeer(peerId: PeerId): Promise<void>;
   disconnectFromPeer(peerId: PeerId): Promise<void>;
+  sendMessage(conversationId: ConversationId, body: string): Promise<void>;
+  markConversationRead(conversationId: ConversationId): Promise<void>;
 }
 
 const emptySnapshot: MessengerSnapshot = {
   identity: undefined,
   peers: [],
   conversations: [],
+  messages: [],
+  messageErrors: {},
   groups: [],
   transfers: [],
   health: [],
 };
+
+function mergeMessages(groups: readonly (readonly ChatMessage[])[]): readonly ChatMessage[] {
+  const byId = new Map<string, ChatMessage>();
+  for (const group of groups) {
+    for (const message of group) {
+      byId.set(message.id, message);
+    }
+  }
+  return [...byId.values()].sort(
+    (a, b) => a.createdAt - b.createdAt || a.id.localeCompare(b.id),
+  );
+}
 
 const MessengerContext = createContext<MessengerContextValue | undefined>(undefined);
 
@@ -104,11 +122,27 @@ export function MessengerProvider({ children, api, mock }: MessengerProviderProp
         activeApi.listGroups(),
         activeApi.listTransfers(),
       ]);
+      const messageErrors: Partial<Record<ConversationId, ErrorInfo>> = {};
+      const messageLists = await Promise.all(
+        conversations.map(async (conversation) => {
+          try {
+            return await activeApi.listMessages(conversation.id);
+          } catch (reason: unknown) {
+            messageErrors[conversation.id] = toUiErrorInfo(
+              reason,
+              'Message history could not be loaded.',
+            );
+            return [];
+          }
+        }),
+      );
 
       setSnapshot({
         identity,
         peers: activeApi.listPeers(),
         conversations,
+        messages: mergeMessages(messageLists),
+        messageErrors,
         groups,
         transfers,
         health: activeApi.getModuleHealth(),
@@ -224,6 +258,28 @@ export function MessengerProvider({ children, api, mock }: MessengerProviderProp
     [runPeerAction],
   );
 
+  const sendMessage = useCallback(
+    async (conversationId: ConversationId, body: string) => {
+      if (!activeApi) {
+        throw new AppError('unavailable', 'Messenger service is not ready.');
+      }
+      await activeApi.sendMessage(conversationId, body);
+      await reload();
+    },
+    [activeApi, reload],
+  );
+
+  const markConversationRead = useCallback(
+    async (conversationId: ConversationId) => {
+      if (!activeApi) {
+        throw new AppError('unavailable', 'Messenger service is not ready.');
+      }
+      await activeApi.markConversationRead(conversationId);
+      await reload();
+    },
+    [activeApi, reload],
+  );
+
   const updateDisplayName = useCallback(
     async (displayName: string) => {
       if (!activeApi) {
@@ -248,6 +304,8 @@ export function MessengerProvider({ children, api, mock }: MessengerProviderProp
         updateDisplayName,
         connectToPeer,
         disconnectFromPeer,
+        sendMessage,
+        markConversationRead,
       }}
     >
       {children}
