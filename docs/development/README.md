@@ -8,6 +8,29 @@ Orientation for contributors and AI agents. Detail lives in [module boundaries](
 - `dev` — integration and testing; only validated work is merged here.
 - Feature branches — one isolated branch per feature/module.
 
+## Implemented toolchain
+
+- **Storage module:** Dart package at `modules/storage` using drift/SQLite; see its [README](../../modules/storage/README.md).
+- **Required tooling:** a Dart SDK with `dart pub`/`dart test`; Flutter is not required to build or test the storage package.
+- **Verified environment:** Dart 3.14.1 on Windows. Flutter SDK and mobile packaging are not yet installed or validated.
+
+Run storage checks from `modules/storage`:
+
+```powershell
+dart pub get
+dart analyze
+dart test
+dart run example/storage_demo.dart
+```
+
+After editing the drift schema, regenerate code:
+
+```powershell
+dart run build_runner build --delete-conflicting-outputs
+```
+
+Do not commit `.dart_tool/`. The generated `lib/src/database.g.dart` is committed because the package is consumed as a path dependency.
+
 ## Independent module development
 
 Modules are implemented against shared interfaces, not each other's internals. Agree contracts in `shared/` first. Each module can be built and tested on its own; failures are reported through module health/status without cascading.

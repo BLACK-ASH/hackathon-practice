@@ -1,6 +1,6 @@
 # Architecture
 
-This document records architectural goals and boundaries. Technology choices are intentionally **not finalized**; they belong in [decisions](../decisions/README.md) once agreed.
+This document records architectural goals and boundaries. The shared storage technology is finalized as Dart + drift/SQLite ([ADR 0001](../decisions/0001-local-storage-drift-sqlite.md)); UI, discovery, and transport choices remain open and belong in [decisions](../decisions/README.md) once agreed.
 
 ## Goals
 
@@ -33,6 +33,14 @@ Open, discover, chat, share, and read history with no internet. Local storage is
 ## Dependency boundaries
 
 Dependencies run one way: feature modules depend on foundation contracts, network interfaces, and storage interfaces. Network core must not depend on UI or chat logic. Feature modules must not depend on unrelated feature internals. Circular dependencies are prohibited.
+
+## Local storage foundation
+
+`modules/storage` is an independent Dart package using drift over SQLite. It owns one shared database per application installation, migration ordering, typed settings, and parameterized SQL access. It deliberately does not export the raw drift database, depend on Flutter, or contain network/feature logic.
+
+The app shell supplies the application data path and setting definitions, calls a single `initialize()`, consumes health/status, and closes the storage on shutdown. Feature modules receive persistence through the package's public API and shared migration definitions; they must not create private databases. The storage database path is infrastructure and must stay hidden from end users.
+
+Platform packaging for native SQLite (especially Flutter/mobile) remains an app-level integration task; the Dart package itself has been verified with Windows/Dart tests.
 
 ## Graceful degradation
 

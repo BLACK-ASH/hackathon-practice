@@ -1,6 +1,6 @@
-# Planned modules
+# Modules
 
-Module directories under `modules/` are organizational placeholders only — no implementation exists yet. Shared contracts live in `shared/`; boundaries are detailed in [module boundaries](../../project/module-boundaries.md).
+Local Storage is implemented as `modules/storage` (`p2p_storage`); the remaining module directories are still placeholders. Shared contracts live in `shared/`; boundaries are detailed in [module boundaries](../../project/module-boundaries.md).
 
 ## Core & Foundation
 
@@ -42,12 +42,16 @@ Module directories under `modules/` are organizational placeholders only — no 
 - **Must not own:** messaging or group internals.
 - **Testing:** mock transfers for success, interruption, invalid metadata, cancellation, progress, failure.
 
-## Local Storage
+## Local Storage — implemented
 
-- **Responsibility:** shared local persistence for identity, settings, conversations, messages, groups, and file metadata; data access interfaces and error handling.
-- **Scope:** **shared infrastructure** — one documented storage capability, not a private store per feature module.
-- **Depends on:** Foundation.
-- **Must not own:** network or feature business logic.
-- **Testing:** persistence across restarts, malformed/corrupt data handling, failure reporting and recovery.
+- **Location:** [`modules/storage`](../../modules/storage/README.md), package `p2p_storage` (Dart, drift, SQLite).
+- **Status:** storage infrastructure foundation complete and tested (51 tests); not yet integrated with an application shell or Flutter UI. Core schema currently contains settings and migration tracking; identity/conversation/message/group/file tables are not implemented yet.
+- **Responsibility:** shared local persistence infrastructure for identity, settings, conversations, messages, groups, and file metadata; database lifecycle, migrations, typed settings, safe parameterized SQL, and error handling.
+- **Scope:** **shared infrastructure** — one database capability, not a private store per feature module.
+- **Public contract:** `Storage`, `StorageConfig`, `SettingsStore`, `SettingDefinition` helpers, `StorageMigration`, migration records/reports, and `StorageException` types, all exported from `package:p2p_storage/storage.dart`.
+- **Depends on:** Foundation contracts/settings definitions only.
+- **Must not own:** network, UI, or feature business logic.
+- **Isolation:** the raw drift database is not exported; feature modules use the public storage API.
+- **Testing:** lifecycle, restart persistence, migration ordering/rollback, settings validation/corruption, SQL errors, transactions, failure recovery.
 
-Five agents can prepare Core, Network, Messaging, Groups, and File Transfer in parallel; Storage is shared infrastructure with boundaries agreed before implementation. No individuals are assigned here.
+Five agents can prepare Core, Network, Messaging, Groups, and File Transfer in parallel; Storage is shared infrastructure and its implemented boundaries are fixed. No individuals are assigned here.

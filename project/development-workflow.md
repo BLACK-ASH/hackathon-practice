@@ -10,7 +10,7 @@ Do not overwrite others' work, discard changes, delete/reset branches, or force-
 
 ## Parallel development
 
-Five independent workstreams are anticipated: Core & Foundation, Network Core, Messaging Engine, Group System, and File Transfer. Storage is shared infrastructure with one set of boundaries defined in [module-boundaries.md](module-boundaries.md). Agree contracts in `shared/` before implementing against them; do not reach into another module's internals.
+Five independent workstreams are anticipated: Core & Foundation, Network Core, Messaging Engine, Group System, and File Transfer. Storage is shared infrastructure with one set of boundaries defined in [module-boundaries.md](module-boundaries.md); its foundation is implemented in `modules/storage` and validated separately. Agree contracts in `shared/` before implementing against them; do not reach into another module's internals.
 
 ## Mock dependencies
 

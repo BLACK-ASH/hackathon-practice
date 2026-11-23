@@ -21,3 +21,8 @@ venv/
 __pycache__/
 coverage/
 .pytest_cache/
+
+# Dart and Flutter build output
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies

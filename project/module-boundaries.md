@@ -29,6 +29,10 @@ Each module initializes independently, reports health/status, uses timeouts, and
 
 Local Storage is **shared infrastructure**: identity, settings, conversations, messages, groups, and file metadata use one documented storage capability, not per-module independent databases.
 
+The implemented storage module is `modules/storage` (`p2p_storage`). Its contract is exported from `package:p2p_storage/storage.dart`: `Storage` lifecycle/health, `StorageConfig`, `SettingsStore` and setting definitions, migration types/reports, and storage exception types. The internal drift database is deliberately not exported. Feature modules must not create private databases, import storage `src/` files, or bypass parameterized SQL helpers.
+
+Schema changes are coordinated centrally through the storage owner. Feature teams provide migration definitions or required columns; versions remain globally unique and ordered. Database paths and raw SQL errors stay out of user-facing UI.
+
 ## Independent development and testing
 
-Parallel work is organized around Core & Foundation, Network Core, Messaging Engine, Group System, and File Transfer; Storage is shared infrastructure with boundaries fixed up front. Every module must be buildable/testable alone using mocks, and integration happens incrementally through `dev`. No implementation files exist yet.
+Parallel work is organized around Core & Foundation, Network Core, Messaging Engine, Group System, and File Transfer; Storage is shared infrastructure with its foundation implemented and boundaries fixed. Every module must be buildable/testable alone using mocks, and integration happens incrementally through `dev`. Other application modules still have no implementation files.

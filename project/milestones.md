@@ -2,6 +2,10 @@
 
 Each milestone leaves the project runnable and demonstrable. Priorities: P0 (M1–M3) minimum viable app, P1 (M4–M5) core hackathon features, P2 enhancements only after P0/P1 are stable. See [AGENTS.md](../AGENTS.md) for full priorities.
 
+## Current status
+
+The Local Storage foundation under M1 is implemented and tested (51 Dart tests); the application shell, identity UI, navigation, and remaining modules are not yet built. M1 is therefore **not complete**.
+
 ## M1 — Foundation
 
 **Goal:** application launches with identity, navigation, independent module initialization, and mock data.

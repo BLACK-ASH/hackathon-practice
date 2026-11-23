@@ -1,6 +1,11 @@
 # Architecture decision records
 
-Lightweight decision log for choices that affect architecture, interfaces, dependencies, or platforms. **No technical decisions have been finalized during scaffolding.**
+Lightweight decision log for choices that affect architecture, interfaces, dependencies, or platforms. Discovery and transport decisions remain open; the storage and cross-platform stack decisions are recorded.
+
+## Records
+
+- [0001 — Local storage uses Dart + drift over SQLite](0001-local-storage-drift-sqlite.md)
+- [0002 — Cross-platform application stack is Flutter + Dart](0002-cross-platform-flutter-dart.md)
 
 ## When to write one
 

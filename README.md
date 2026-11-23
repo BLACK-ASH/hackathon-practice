@@ -8,7 +8,7 @@ Make local peer-to-peer communication simple enough for anyone to use: open the 
 
 ## Status
 
-**Initialization / planning stage.** This repository contains documentation and organizational placeholders only. No application code, framework, or dependencies have been created; nothing has been built or run.
+**Foundation in progress.** The shared local storage foundation is implemented as a standalone Dart package with SQLite/drift, tested, and documented. The application shell, UI, networking, messaging, groups, and file-transfer modules are still placeholders.
 
 ## Core features (planned)
 
@@ -30,11 +30,20 @@ One shared codebase for desktop and mobile where practical, with platform-specif
 
 ## Architecture overview
 
-- `modules/` — planned independent modules: core (foundation), network, messaging, groups, file-transfer, and shared storage infrastructure.
+- `modules/storage/` — implemented local storage foundation (`p2p_storage`): lifecycle, migrations, typed settings, and safe SQL access. See [its README](modules/storage/README.md).
+- `modules/` — other planned independent modules: core (foundation), network, messaging, groups, and file-transfer.
 - `shared/` — home for agreed contracts and types before implementation.
 - `docs/` — architecture, module, development, and decision documentation.
 - `project/` — milestones, module boundaries, and development workflow.
-- `tests/` — planned testing approach.
+- `tests/` — testing approach and implemented storage tests.
+
+```powershell
+cd modules/storage
+dart pub get
+dart analyze
+dart test
+dart run example/storage_demo.dart
+```
 
 See [AGENTS.md](AGENTS.md) for the full project context and agent rules.
 
