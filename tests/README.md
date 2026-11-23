@@ -1,6 +1,6 @@
-# Testing approach (planned)
+# Testing approach
 
-No tests exist yet. This document records the intended levels; actual test tooling is chosen later with the technology stack.
+Automated tests use `flutter_test`. The current Level 0 suite covers shared value types, contracts/interfaces, identity, configuration, events, typed errors, module lifecycle/failure isolation/timeouts, storage interfaces, mock substitution, app composition, and the shell widget. Run it with `flutter analyze` and `flutter test`; both currently pass (47 tests).
 
 - **Unit tests** — pure logic in isolation: IDs, validation, message ordering, deduplication, metadata checks.
 - **Module tests** — one module at a time through its public interface, with its dependencies mocked; verifies module health and failure isolation.

@@ -1,0 +1,7 @@
+name: p2p_lan_messenger_shared
+description: "Shared Level 0 contracts, types, foundation services, and mocks."
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ^3.14.0

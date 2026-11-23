@@ -8,7 +8,7 @@ Make local peer-to-peer communication simple enough for anyone to use: open the 
 
 ## Status
 
-**Initialization / planning stage.** This repository contains documentation and organizational placeholders only. No application code, framework, or dependencies have been created; nothing has been built or run.
+Level 0 Foundation is implemented and verified: the Flutter app shell starts with mock-backed identity and configuration, shared contracts/services are available as a local Dart package, and the automated suite passes (`flutter analyze`, 47 `flutter test` cases). Real peer discovery, direct transport, messaging, groups, file transfer, and production persistent storage are still planned; current dependency providers are explicitly mock implementations.
 
 ## Core features (planned)
 
@@ -30,11 +30,12 @@ One shared codebase for desktop and mobile where practical, with platform-specif
 
 ## Architecture overview
 
-- `modules/` — planned independent modules: core (foundation), network, messaging, groups, file-transfer, and shared storage infrastructure.
-- `shared/` — home for agreed contracts and types before implementation.
+- `lib/` — Flutter application shell and composition root; `lib/src/foundation/` wires mock-backed foundation modules.
+- `shared/lib/` — local Dart package `p2p_lan_messenger_shared`: shared types, contracts, foundation services, and clearly labeled mocks.
+- `shared/documentation/` — notes describing the shared foundation layer.
 - `docs/` — architecture, module, development, and decision documentation.
 - `project/` — milestones, module boundaries, and development workflow.
-- `tests/` — planned testing approach.
+- `test/` — automated Level 0 test suite.
 
 See [AGENTS.md](AGENTS.md) for the full project context and agent rules.
 

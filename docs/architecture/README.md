@@ -18,6 +18,8 @@ Core logic must not depend on a specific operating system. Platform-specific beh
 
 Planned modules: core/foundation, network (discovery + connections), messaging, groups, file-transfer, and local storage. See [module documentation](../modules/README.md) and [module boundaries](../../project/module-boundaries.md). Modules communicate through stable contracts and events, never through each other's internals.
 
+Level 0 shared types, contracts, interfaces, foundation services, and mocks live under `shared/lib/` and are exposed as the local package `p2p_lan_messenger_shared`. See [shared foundation documentation](../../shared/documentation/README.md). The app shell consumes them through `package:` imports and composes mock-backed identity/configuration modules in `lib/src/foundation/foundation_components.dart`. Network Core is the intended producer of `PeerDirectory` and `PeerPayloadSender`; no production network, storage, messaging, group, or file-transfer implementation exists yet.
+
 ## Peer-to-peer communication concept
 
 Peers discover each other on the local network, exchange identity, then open direct connections for messages and files. Group messages are distributed over those same direct connections — one unreachable member must not block the rest. Discovery is abstracted so platform-specific mechanisms can be swapped in.

@@ -10,15 +10,21 @@ Orientation for contributors and AI agents. Detail lives in [module boundaries](
 
 ## Independent module development
 
-Modules are implemented against shared interfaces, not each other's internals. Agree contracts in `shared/` first. Each module can be built and tested on its own; failures are reported through module health/status without cascading.
+Modules are implemented against shared interfaces, not each other's internals. Agree contracts in the local `p2p_lan_messenger_shared` package first. Each module can be built and tested on its own; failures are reported through module health/status without cascading.
 
 ## Mock-based development
 
 Every module needs mock dependencies so work doesn't wait on others: mock discovery/connections, mock transport (delay, failure, duplicates, offline), mock peers, and mock transfers. Mocks must be clearly labeled and swappable for real implementations via the same interfaces.
 
+Level 0 mocks live in `shared/lib/mocks/mocks.dart` and are used by `lib/src/foundation/foundation_components.dart` for the runnable app shell. They are development doubles, not production implementations.
+
 ## Testing expectations
 
-Unit, module, mock, and integration tests; later cross-device LAN and failure/recovery tests. Do not claim untested functionality works — see [tests/README.md](../../tests/README.md).
+Unit, module, mock, and integration tests; later cross-device LAN and failure/recovery tests. Verify changes with `flutter analyze` and `flutter test` from the repository root. Do not claim untested functionality works — see [tests/README.md](../../tests/README.md).
+
+## Shared package layout
+
+Shared Dart code is a local path package rooted at `shared/` and imported as `package:p2p_lan_messenger_shared/...`. Application code imports `package:p2p_lan_messenger/...`. This keeps the shared layer independently testable while allowing app code to consume it without fragile cross-package relative paths.
 
 ## Incremental integration
 

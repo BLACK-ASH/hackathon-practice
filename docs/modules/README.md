@@ -1,10 +1,11 @@
-# Planned modules
+# Modules
 
-Module directories under `modules/` are organizational placeholders only — no implementation exists yet. Shared contracts live in `shared/`; boundaries are detailed in [module boundaries](../../project/module-boundaries.md).
+Feature module directories remain organizational placeholders. Level 0 foundation is implemented in `lib/src/foundation/` and in the local `p2p_lan_messenger_shared` package under `shared/lib/`. Boundaries are detailed in [module boundaries](../../project/module-boundaries.md).
 
 ## Core & Foundation
 
 - **Responsibility:** application lifecycle, shared contracts, common types, local identity, configuration, module registration/health, events, errors, coordination.
+- **Status:** Level 0 implemented and tested; production network/storage adapters and feature modules are not implemented.
 - **Scope:** small Level 0 base that other modules can depend on; mock-friendly from day one.
 - **Depends on:** platform/storage interfaces it defines itself; nothing else.
 - **Must not own:** networking, chat rules, group rules, transfer logic, UI widgets.

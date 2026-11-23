@@ -5,6 +5,15 @@ desktop.ini
 *.swp
 *~
 .idea/
+*.iml
+
+# Flutter/Dart generated
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
 
 # Logs and local configuration
 *.log

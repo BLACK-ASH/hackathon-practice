@@ -21,7 +21,7 @@ Authoritative boundary reference; see [docs/modules](../docs/modules/README.md) 
 
 ## Shared contracts
 
-Interfaces and common types belong in `shared/contracts` and `shared/types`, agreed before implementation. Modules communicate through those contracts and events. Platform-specific behavior sits behind adapters with graceful fallbacks; mock implementations satisfy the same contracts as real ones.
+Interfaces and common types belong in `shared/lib/contracts` and `shared/lib/types` inside the local `p2p_lan_messenger_shared` package, agreed before implementation. Foundation services and clearly labeled mocks live in `shared/lib/foundation` and `shared/lib/mocks`. Modules communicate through those contracts and events. Platform-specific behavior sits behind adapters with graceful fallbacks; mock implementations satisfy the same contracts as real ones.
 
 ## Module isolation
 
@@ -31,4 +31,4 @@ Local Storage is **shared infrastructure**: identity, settings, conversations, m
 
 ## Independent development and testing
 
-Parallel work is organized around Core & Foundation, Network Core, Messaging Engine, Group System, and File Transfer; Storage is shared infrastructure with boundaries fixed up front. Every module must be buildable/testable alone using mocks, and integration happens incrementally through `dev`. No implementation files exist yet.
+Parallel work is organized around Core & Foundation, Network Core, Messaging Engine, Group System, and File Transfer; Storage is shared infrastructure with boundaries fixed up front. Every module must be buildable/testable alone using mocks, and integration happens incrementally through `dev`. Level 0 types, contracts, foundation services, and mocks now exist under `shared/lib/...`; the app shell consumes them via `package:p2p_lan_messenger_shared/...` and `package:p2p_lan_messenger/...`. Feature modules remain to be implemented.
